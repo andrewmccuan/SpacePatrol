@@ -27,6 +27,7 @@ void andrew_generateCreditTex()
 }
 */
 
+/*
 void andrew_creditPic() 
 {
     glColor3ub(255, 255, 255);
@@ -39,13 +40,13 @@ void andrew_creditPic()
 	glEnd();
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
+*/
 
-void andrew_credit_text()
+void andrew_credit_text(int yres, int xres)
 {
     Rect r;
-	glClear(GL_COLOR_BUFFER_BIT);
-	r.bot = gl.yres - 20;
-	r.left = 10;
+	r.bot = yres - 20;
+	r.left = xres;
 	r.center = 0;
     ggprint8b(&r, 75, 0x0000ffff, "Andrew Mccuan");
 }
