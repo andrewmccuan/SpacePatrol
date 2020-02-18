@@ -119,6 +119,7 @@ public:
 
 class Global {
 public:
+    int credits = 0;
 	int xres, yres;
 	char keys[65536];
 	Global() {
@@ -362,6 +363,7 @@ public:
 } x11(0, 0);
 
 //function prototypes
+void andrew_credit_text(int, int);
 void genAndBindDoneyImage();
 void renderDoneyImage();
 void init_opengl(void);
@@ -588,6 +590,9 @@ int check_keys(XEvent *e)
 			break;
 		case XK_minus:
 			break;
+        case XK_c:
+            gl.credits = gl.credits ^ 1;
+            break;
 	}
 	return 0;
 }
@@ -863,6 +868,9 @@ void render()
 	ggprint8b(&r, 16, 0x00ff0000, "3350 - Asteroids");
 	ggprint8b(&r, 16, 0x00ffff00, "n bullets: %i", g.nbullets);
 	ggprint8b(&r, 16, 0x00ffff00, "n asteroids: %i", g.nasteroids);
+    if (gl.credits == 1) {
+        andrew_credit_text(gl.yres, gl.xres);
+    }
 
     //renderDoneyImage();
 	//-------------------------------------------------------------------------
