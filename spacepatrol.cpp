@@ -363,6 +363,7 @@ public:
 } x11(0, 0);
 
 //function prototypes
+void raag_text(int, int);
 void renderDoneyTextCredits(int, int);
 void draw_will_text(int, int);
 void andrew_credit_text(int, int);
@@ -875,6 +876,8 @@ void render()
         andrew_credit_text(gl.yres, gl.xres);
         renderDoneyTextCredits(gl.yres, gl.xres);
         draw_will_text(gl.yres, gl.xres);
+        raag_text(gl.yres, gl.xres);
+        
         
     }
 
