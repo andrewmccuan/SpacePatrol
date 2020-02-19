@@ -2,6 +2,9 @@
 // 02/17/2020
 
 
+#include <GL/glx.h>
+#include "fonts.h"
+
 void raag_text(int yres, int kes)
 {
     Rect r;
