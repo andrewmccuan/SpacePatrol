@@ -363,6 +363,7 @@ public:
 } x11(0, 0);
 
 //function prototypes
+void renderDoneyTextCredits(int, int);
 void draw_will_text(int, int);
 void andrew_credit_text(int, int);
 void genAndBindDoneyImage();
@@ -872,6 +873,7 @@ void render()
     if (gl.credits == 1) {
         andrew_credit_text(gl.yres, gl.xres);
         draw_will_text(gl.yres, gl.xres);
+        renderaDoneyTextCredits(gl.yres, gl.xres);
     }
 
     //renderDoneyImage();
