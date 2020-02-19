@@ -5,11 +5,11 @@
 #include <GL/glx.h>
 #include "fonts.h"
 
-void raag_text(int yres, int kes)
+void raag_text(int yres, int xres)
 {
     Rect r;
     r.bot = yres-20;
-    r.ley = kes/2;
+    r.left = xres/2;
     r.center = 0;
-    ggprint8b(&r,75, 0c4b3ecf, "Raag Patel");
+    ggprint8b(&r,75, 0x4b3ecf, "Raag Patel");
 }
