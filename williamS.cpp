@@ -1,6 +1,6 @@
 // William Source File
 // Created February 2020
-//
+// Some work from friday was added
 
 #include <GL/glx.h>
 #include "fonts.h"
