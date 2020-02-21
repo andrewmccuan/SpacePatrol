@@ -144,7 +144,7 @@ public:
 		pos[1] = (Flt)(gl.yres/2);
 		pos[2] = 0.0f;
 		VecZero(vel);
-		angle = 0.0;
+		angle = 270.0;
 		color[0] = color[1] = color[2] = 1.0;
 	}
 };
@@ -376,7 +376,7 @@ void check_mouse(XEvent *e);
 int check_keys(XEvent *e);
 void physics();
 void render();
-
+int movement(int);
 //==========================================================================
 // M A I N
 //==========================================================================
@@ -794,34 +794,34 @@ void physics()
 	}
 	//---------------------------------------------------
 	//check keys pressed now
+
+
 	if (gl.keys[XK_Left]) {
-		g.ship.angle += 4.0;
-		if (g.ship.angle >= 360.0f)
-			g.ship.angle -= 360.0f;
+		g.ship.vel[0] = movement(0);
 	}
+
+	if (!gl.keys[XK_Left]) {
+		g.ship.vel[0] = 0;
+	}
+
 	if (gl.keys[XK_Right]) {
-		g.ship.angle -= 4.0;
-		if (g.ship.angle < 0.0f)
-			g.ship.angle += 360.0f;
+		g.ship.vel[0] = movement(1);    
 	}
+	
+	if (!gl.keys[XK_Up]) {
+		g.ship.vel[1] = 0;
+	}
+
 	if (gl.keys[XK_Up]) {
-		//apply thrust
-		//convert ship angle to radians
-		Flt rad = ((g.ship.angle+90.0) / 360.0f) * PI * 2.0;
-		//convert angle to a vector
-		Flt xdir = cos(rad);
-		Flt ydir = sin(rad);
-		g.ship.vel[0] += xdir*0.02f;
-		g.ship.vel[1] += ydir*0.02f;
-		Flt speed = sqrt(g.ship.vel[0]*g.ship.vel[0]+
-				g.ship.vel[1]*g.ship.vel[1]);
-		if (speed > 10.0f) {
-			speed = 10.0f;
-			normalize2d(g.ship.vel);
-			g.ship.vel[0] *= speed;
-			g.ship.vel[1] *= speed;
-		}
+		g.ship.vel[1] = 2;
 	}
+
+	if (gl.keys[XK_Down]) {
+		g.ship.vel[1] = movement(0);
+	}
+
+
+
 	if (gl.keys[XK_space]) {
 		//a little time between each bullet
 		struct timespec bt;
