@@ -120,6 +120,7 @@ public:
 class Global {
 public:
     int credits = 0;
+    int tgif = 0;
 	int xres, yres;
 	char keys[65536];
 	Global() {
@@ -363,6 +364,7 @@ public:
 } x11(0, 0);
 
 //function prototypes
+void renderTGIF (int, int);
 void raag_text(int, int);
 void renderDoneyTextCredits(int, int);
 void draw_will_text(int, int);
@@ -595,6 +597,9 @@ int check_keys(XEvent *e)
 			break;
         case XK_c:
             gl.credits = gl.credits ^ 1;
+            break;
+        case XK_d:
+            gl.tgif = gl.tgif ^ 1;
             break;
 	}
 	return 0;
@@ -877,8 +882,10 @@ void render()
         renderDoneyTextCredits(gl.yres, gl.xres);
         draw_will_text(gl.yres, gl.xres);
         raag_text(gl.yres, gl.xres);
-        
-        
+    }
+
+    if (gl.tgif == 1) {
+        renderTGIF(gl.yres, gl.xres);
     }
 
     //renderDoneyImage();
