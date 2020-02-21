@@ -877,6 +877,7 @@ void render()
 	ggprint8b(&r, 16, 0x00ffff00, "n bullets: %i", g.nbullets);
 	ggprint8b(&r, 16, 0x00ffff00, "n asteroids: %i", g.nasteroids);
 	ggprint8b(&r, 16, 0x00ffff00, "Press c for credits");
+    ggprint8b(&r, 16, 0x00ffff00, "Press d if its Friday");
     if (gl.credits == 1) {
         andrew_credit_text(gl.yres, gl.xres);
         renderDoneyTextCredits(gl.yres, gl.xres);
