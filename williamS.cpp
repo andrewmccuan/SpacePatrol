@@ -14,8 +14,8 @@ void draw_will_text(int yres, int xres)
 	ggprint8b(&r, 20, 0x00ff0000, "William Sparks - Space Patrol");
 }
 
-
-int movement(int flag) {
+int movement(int flag) 
+{
 	int arr[2] = {-2, 2};
 	return arr[flag];
 }
