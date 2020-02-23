@@ -119,8 +119,9 @@ public:
 
 class Global {
 public:
-    int credits = 0;
-    int tgif = 0;
+	int credits = 0;
+	int collision_det = 0;
+	int tgif = 0;
 	int xres, yres;
 	char keys[65536];
 	Global() {
@@ -377,6 +378,9 @@ int check_keys(XEvent *e);
 void physics();
 void render();
 int movement(int);
+int destroy_ship(float, float, Asteroid *);
+void det_coll(int yres, int xres);
+
 //==========================================================================
 // M A I N
 //==========================================================================
@@ -523,13 +527,13 @@ void check_mouse(XEvent *e)
 		//std::flush;
 		if (xdiff > 0) {
 			//std::cout << "xdiff: " << xdiff << std::endl << std::flush;
-			g.ship.angle += 0.05f * (float)xdiff;
+			//g.ship.angle += 0.05f * (float)xdiff;
 			if (g.ship.angle >= 360.0f)
 				g.ship.angle -= 360.0f;
 		}
 		else if (xdiff < 0) {
 			//std::cout << "xdiff: " << xdiff << std::endl << std::flush;
-			g.ship.angle += 0.05f * (float)xdiff;
+			//g.ship.angle += 0.05f * (float)xdiff;
 			if (g.ship.angle < 0.0f)
 				g.ship.angle += 360.0f;
 		}
@@ -595,12 +599,12 @@ int check_keys(XEvent *e)
 			break;
 		case XK_minus:
 			break;
-        case XK_c:
-            gl.credits = gl.credits ^ 1;
-            break;
-        case XK_d:
-            gl.tgif = gl.tgif ^ 1;
-            break;
+		case XK_c:
+			gl.credits = gl.credits ^ 1;
+			break;
+		case XK_d:
+			gl.tgif = gl.tgif ^ 1;
+			break;
 	}
 	return 0;
 }
@@ -794,6 +798,14 @@ void physics()
 	}
 	//---------------------------------------------------
 	//check keys pressed now
+	
+	//check collision of ship and objects
+	a = g.ahead;
+	if (destroy_ship(g.ship.pos[0], g.ship.pos[1], a)) {
+		gl.collision_det = 1;
+	} else {
+		gl.collision_det = 0;
+	}
 
 
 	if (gl.keys[XK_Left]) {
@@ -820,7 +832,13 @@ void physics()
 		g.ship.vel[1] = movement(0);
 	}
 
+	if (gl.keys[XK_Down] && gl.keys[XK_Up]) {
+		g.ship.vel[1] = 0;
+	}
 
+	if (gl.keys[XK_Left] && gl.keys[XK_Right]) {
+		g.ship.vel[0] = 0;
+	}
 
 	if (gl.keys[XK_space]) {
 		//a little time between each bullet
@@ -837,7 +855,7 @@ void physics()
 				b->pos[0] = g.ship.pos[0];
 				b->pos[1] = g.ship.pos[1];
 				b->vel[0] = g.ship.vel[0];
-				b->vel[1] = g.ship.vel[1];
+				b->vel[1] = .25 * g.ship.vel[1];
 				//convert ship angle to radians
 				Flt rad = ((g.ship.angle+90.0) / 360.0f) * PI * 2.0;
 				//convert angle to a vector
@@ -885,6 +903,9 @@ void render()
         raag_text(gl.yres, gl.xres);
     }
 
+    if (gl.collision_det == 1) {
+	det_coll(gl.yres, gl.xres);
+    }
     if (gl.tgif == 1) {
         renderTGIF(gl.yres, gl.xres);
     }
