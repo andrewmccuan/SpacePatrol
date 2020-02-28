@@ -119,6 +119,9 @@ public:
 
 class Global {
 public:
+	int credits = 0;
+	int collision_det = 0;
+	int tgif = 0;
 	int xres, yres;
 	char keys[65536];
 	Global() {
@@ -142,7 +145,7 @@ public:
 		pos[1] = (Flt)(gl.yres/2);
 		pos[2] = 0.0f;
 		VecZero(vel);
-		angle = 0.0;
+		angle = 270.0;
 		color[0] = color[1] = color[2] = 1.0;
 	}
 };
@@ -362,6 +365,11 @@ public:
 } x11(0, 0);
 
 //function prototypes
+void renderTGIF (int, int);
+void raag_text(int, int);
+void renderDoneyTextCredits(int, int);
+void draw_will_text(int, int);
+void andrew_credit_text(int, int);
 void genAndBindDoneyImage();
 void renderDoneyImage();
 void init_opengl(void);
@@ -369,6 +377,9 @@ void check_mouse(XEvent *e);
 int check_keys(XEvent *e);
 void physics();
 void render();
+int movement(int);
+int destroy_ship(float, float, Asteroid *);
+void det_coll(int yres, int xres);
 
 //==========================================================================
 // M A I N
@@ -516,13 +527,13 @@ void check_mouse(XEvent *e)
 		//std::flush;
 		if (xdiff > 0) {
 			//std::cout << "xdiff: " << xdiff << std::endl << std::flush;
-			g.ship.angle += 0.05f * (float)xdiff;
+			//g.ship.angle += 0.05f * (float)xdiff;
 			if (g.ship.angle >= 360.0f)
 				g.ship.angle -= 360.0f;
 		}
 		else if (xdiff < 0) {
 			//std::cout << "xdiff: " << xdiff << std::endl << std::flush;
-			g.ship.angle += 0.05f * (float)xdiff;
+			//g.ship.angle += 0.05f * (float)xdiff;
 			if (g.ship.angle < 0.0f)
 				g.ship.angle += 360.0f;
 		}
@@ -587,6 +598,12 @@ int check_keys(XEvent *e)
 		case XK_equal:
 			break;
 		case XK_minus:
+			break;
+		case XK_c:
+			gl.credits = gl.credits ^ 1;
+			break;
+		case XK_d:
+			gl.tgif = gl.tgif ^ 1;
 			break;
 	}
 	return 0;
@@ -781,34 +798,48 @@ void physics()
 	}
 	//---------------------------------------------------
 	//check keys pressed now
+	
+	//check collision of ship and objects
+	a = g.ahead;
+	if (destroy_ship(g.ship.pos[0], g.ship.pos[1], a)) {
+		gl.collision_det = 1;
+	} else {
+		gl.collision_det = 0;
+	}
+
+
 	if (gl.keys[XK_Left]) {
-		g.ship.angle += 4.0;
-		if (g.ship.angle >= 360.0f)
-			g.ship.angle -= 360.0f;
+		g.ship.vel[0] = movement(0);
 	}
+
+	if (!gl.keys[XK_Left]) {
+		g.ship.vel[0] = 0;
+	}
+
 	if (gl.keys[XK_Right]) {
-		g.ship.angle -= 4.0;
-		if (g.ship.angle < 0.0f)
-			g.ship.angle += 360.0f;
+		g.ship.vel[0] = movement(1);    
 	}
+	
+	if (!gl.keys[XK_Up]) {
+		g.ship.vel[1] = 0;
+	}
+
 	if (gl.keys[XK_Up]) {
-		//apply thrust
-		//convert ship angle to radians
-		Flt rad = ((g.ship.angle+90.0) / 360.0f) * PI * 2.0;
-		//convert angle to a vector
-		Flt xdir = cos(rad);
-		Flt ydir = sin(rad);
-		g.ship.vel[0] += xdir*0.02f;
-		g.ship.vel[1] += ydir*0.02f;
-		Flt speed = sqrt(g.ship.vel[0]*g.ship.vel[0]+
-				g.ship.vel[1]*g.ship.vel[1]);
-		if (speed > 10.0f) {
-			speed = 10.0f;
-			normalize2d(g.ship.vel);
-			g.ship.vel[0] *= speed;
-			g.ship.vel[1] *= speed;
-		}
+		g.ship.vel[1] = 2;
 	}
+
+	if (gl.keys[XK_Down]) {
+		g.ship.vel[1] = movement(0);
+	}
+
+	if (gl.keys[XK_Down] && gl.keys[XK_Up]) {
+		g.ship.vel[1] = 0;
+	}
+
+	if (gl.keys[XK_Left] && gl.keys[XK_Right]) {
+		g.ship.vel[0] = 0;
+	}
+
 	if (gl.keys[XK_space]) {
 		//a little time between each bullet
 		struct timespec bt;
@@ -824,7 +855,7 @@ void physics()
 				b->pos[0] = g.ship.pos[0];
 				b->pos[1] = g.ship.pos[1];
 				b->vel[0] = g.ship.vel[0];
-				b->vel[1] = g.ship.vel[1];
+				b->vel[1] = .25 * g.ship.vel[1];
 				//convert ship angle to radians
 				Flt rad = ((g.ship.angle+90.0) / 360.0f) * PI * 2.0;
 				//convert angle to a vector
@@ -863,6 +894,21 @@ void render()
 	ggprint8b(&r, 16, 0x00ff0000, "3350 - Asteroids");
 	ggprint8b(&r, 16, 0x00ffff00, "n bullets: %i", g.nbullets);
 	ggprint8b(&r, 16, 0x00ffff00, "n asteroids: %i", g.nasteroids);
+	ggprint8b(&r, 16, 0x00ffff00, "Press c for credits");
+    ggprint8b(&r, 16, 0x00ffff00, "Press d if its Friday");
+    if (gl.credits == 1) {
+        andrew_credit_text(gl.yres, gl.xres);
+        renderDoneyTextCredits(gl.yres, gl.xres);
+        draw_will_text(gl.yres, gl.xres);
+        raag_text(gl.yres, gl.xres);
+    }
+
+    if (gl.collision_det == 1) {
+	det_coll(gl.yres, gl.xres);
+    }
+    if (gl.tgif == 1) {
+        renderTGIF(gl.yres, gl.xres);
+    }
 
     //renderDoneyImage();
 	//-------------------------------------------------------------------------

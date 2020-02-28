@@ -45,8 +45,9 @@ void andrew_creditPic()
 void andrew_credit_text(int yres, int xres)
 {
     Rect r;
+	glClear(GL_COLOR_BUFFER_BIT);
 	r.bot = yres - 20;
-	r.left = xres;
+	r.left = xres/2;
 	r.center = 0;
     ggprint8b(&r, 75, 0x0000ffff, "Andrew Mccuan");
 }
