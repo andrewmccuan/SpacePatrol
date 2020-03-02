@@ -45,6 +45,7 @@ const float gravity = -0.2f;
 #define ALPHA 1
 const int MAX_BULLETS = 11;
 const Flt MINIMUM_ASTEROID_SIZE = 60.0;
+const int MAX_ENEMIES = 2;
 
 //-----------------------------------------------------------------------------
 //Setup timers
@@ -56,6 +57,7 @@ extern double physicsCountdown;
 extern double timeSpan;
 extern double timeDiff(struct timespec *start, struct timespec *end);
 extern void timeCopy(struct timespec *dest, struct timespec *source);
+
 //-----------------------------------------------------------------------------
 
 Image:: ~Image() { delete [] data; }
@@ -136,17 +138,23 @@ public:
 	Vec vel;
 	float angle;
 	float color[3];
+	bool valid_enemy;
+	int numbullets;
 public:
 	Ship() {
 		VecZero(dir);
 		pos[0] = (Flt)(gl.xres/2);
 		pos[1] = (Flt)(gl.yres/2);
 		pos[2] = 0.0f;
+		numbullets = 0;
 		VecZero(vel);
 		angle = 270.0;
 		color[0] = color[1] = color[2] = 1.0;
+		valid_enemy = 0;
 	}
 };
+
+void new_ship(Ship *my_enemy, int a);
 
 class Bullet {
 public:
@@ -180,19 +188,29 @@ public:
 class Game {
 public:
 	Ship ship;
+	Ship enemies[MAX_ENEMIES];
 	Asteroid *ahead;
 	Bullet *barr;
+	Bullet *ebarr;
+	int nships;
 	int nasteroids;
 	int nbullets;
+	int ebullets;
+	int nenemies;
 	struct timespec bulletTimer;
+	struct timespec ebulletTimer;
 	struct timespec mouseThrustTimer;
 	bool mouseThrustOn;
 public:
 	Game() {
+
 		ahead = NULL;
 		barr = new Bullet[MAX_BULLETS];
+		ebarr = new Bullet[100];
 		nasteroids = 0;
 		nbullets = 0;
+		ebullets = 0;
+		nships = 0;
 		mouseThrustOn = false;
 		//build 10 asteroids...
 		for (int j=0; j<10; j++) {
@@ -226,6 +244,13 @@ public:
 			++nasteroids;
 		}
 		clock_gettime(CLOCK_REALTIME, &bulletTimer);
+		nenemies = 0;
+		for (int k = 0; k < MAX_ENEMIES; k++) {
+			new_ship(&enemies[k], k);
+			std::cout << "Ship position x: " << enemies[k].pos[0] << std::endl;
+		
+			//enemies[k].valid_enemy = 0;
+		}
 	}
 	~Game() {
 		delete [] barr;
@@ -370,6 +395,9 @@ void draw_will_text(int, int);
 void andrew_credit_text(int, int);
 //void genAndBindDoneyImage();
 void renderDoneyImage(GLuint, int, int);
+void genAndBindDoneyImage();
+void enemy_bullets();
+void renderDoneyImage();
 void init_opengl(void);
 void check_mouse(XEvent *e);
 int check_keys(XEvent *e);
@@ -378,7 +406,6 @@ void render();
 int movement(int);
 int destroy_ship(float, float, Asteroid *);
 void det_coll(int yres, int xres);
-
 //==========================================================================
 // M A I N
 //==========================================================================
@@ -406,6 +433,7 @@ int main()
 			physics();
 			physicsCountdown -= physicsRate;
 		}
+		enemy_bullets();
 		render();
 		x11.swapBuffers();
 	}
@@ -666,6 +694,11 @@ void physics()
 	//Update ship position
 	g.ship.pos[0] += g.ship.vel[0];
 	g.ship.pos[1] += g.ship.vel[1];
+	for (int k = 0; k < MAX_ENEMIES; k++) {
+		g.enemies[k].pos[0] += g.enemies[k].vel[0];
+		g.enemies[k].pos[1] += g.enemies[k].vel[1];	
+
+	}
 	//Check for collision with window edges
 	if (g.ship.pos[0] < 0.0) {
 		g.ship.pos[0] += (float)gl.xres;
@@ -715,6 +748,43 @@ void physics()
 		}
 		i++;
 	}
+	i = 0;
+	while (i < g.ebullets) {
+		Bullet *b = &g.ebarr[i];
+		//How long has bullet been alive?
+		//double ts = timeDiff(&b->time, &bt);
+
+		//move the bullet
+		b->pos[0] += b->vel[0];
+		b->pos[1] += b->vel[1];
+		//Check for collision with window edges
+		if (b->pos[0] < 0.0) {
+			b->pos[0] += (float)gl.xres;
+			memcpy(&g.ebarr[i], &g.ebarr[g.ebullets-1],
+				sizeof(Bullet));
+			g.ebullets--;
+		}
+		else if (b->pos[0] > (float)gl.xres) {
+			b->pos[0] -= (float)gl.xres;
+			memcpy(&g.ebarr[i], &g.ebarr[g.ebullets-1],
+				sizeof(Bullet));
+			g.ebullets--;		
+		}
+		else if (b->pos[1] < 0.0) {
+			b->pos[1] += (float)gl.yres;
+			memcpy(&g.ebarr[i], &g.ebarr[g.ebullets-1],
+				sizeof(Bullet));
+			g.ebullets--;			
+		}
+		else if (b->pos[1] > (float)gl.yres) {
+			b->pos[1] -= (float)gl.yres;
+			memcpy(&g.ebarr[i], &g.ebarr[g.ebullets-1],
+				sizeof(Bullet));
+			g.ebullets--;				
+		}
+		i++;
+	}
+
 	//
 	//Update asteroid positions
 	Asteroid *a = g.ahead;
@@ -881,6 +951,43 @@ void physics()
 	}
 }
 
+void enemy_bullets() 
+{
+
+	struct timespec bt;
+	clock_gettime(CLOCK_REALTIME, &bt);
+	double ts = timeDiff(&g.ebulletTimer, &bt);
+	
+	if (ts > 0.1) {
+		timeCopy(&g.ebulletTimer, &bt);
+		for (int i = 0; i<MAX_ENEMIES; i++) {
+		if (g.ebullets < 100 && g.enemies[i].numbullets < 50) {
+			g.enemies[i].numbullets += 1;
+			Bullet *b = &g.ebarr[g.ebullets];
+			timeCopy(&b->time, &bt);
+			b->pos[0] = g.enemies[i].pos[0];
+			b->pos[1] = g.enemies[i].pos[1];
+			b->vel[0] = g.enemies[i].vel[0];
+			b->vel[1] = g.enemies[i].vel[1];
+			//convert ship angle to radians
+			Flt rad = ((g.enemies[i].angle+90.0) / 360.0f) * PI * 2.0;
+			//convert angle to a vector
+			Flt xdir = cos(rad);
+			Flt ydir = sin(rad);
+			b->pos[0] += xdir*20.0f;
+			b->pos[1] += ydir*20.0f;
+			b->vel[0] += xdir*6.0f + rnd()*0.1;
+			b->vel[1] += ydir*6.0f + rnd()*0.1;
+			b->color[0] = 1.0f;
+			b->color[1] = 1.0f;
+			b->color[2] = 1.0f;
+			++g.ebullets;
+		}
+		}
+	}
+
+}
+
 void render()
 {
 	Rect r;
@@ -893,21 +1000,30 @@ void render()
 	ggprint8b(&r, 16, 0x00ffff00, "n bullets: %i", g.nbullets);
 	ggprint8b(&r, 16, 0x00ffff00, "n asteroids: %i", g.nasteroids);
 	ggprint8b(&r, 16, 0x00ffff00, "Press c for credits");
-    ggprint8b(&r, 16, 0x00ffff00, "Press d if its Friday");
-    if (gl.credits == 1) {
-        andrew_credit_text(gl.yres, gl.xres);
-        renderDoneyTextCredits(gl.yres, gl.xres);
+
+	ggprint8b(&r, 16, 0x00ffff00, "Press d if its Friday");
+
+	if (gl.credits == 1) {
+		andrew_credit_text(gl.yres, gl.xres);
+		renderDoneyTextCredits(gl.yres, gl.xres);
 		renderDoneyImage(gl.doneyTexture, gl.yres, gl.xres);
-        draw_will_text(gl.yres, gl.xres);
-        raag_text(gl.yres, gl.xres);
+		draw_will_text(gl.yres, gl.xres);
+		raag_text(gl.yres, gl.xres);
     }
 
-    if (gl.collision_det == 1) {
-	det_coll(gl.yres, gl.xres);
-    }
-    if (gl.tgif == 1) {
-        renderTGIF(gl.yres, gl.xres);
-    }
+
+
+	if (gl.collision_det == 1) {
+		det_coll(gl.yres, gl.xres);
+	}
+    
+	if (gl.tgif == 1) {
+		renderTGIF(gl.yres, gl.xres);
+	}
+
+
+
+	//renderDoneyImage();
 
 	//-------------------------------------------------------------------------
 	//Draw the ship
@@ -932,6 +1048,35 @@ void render()
 	glVertex2f(0.0f, 0.0f);
 	glEnd();
 	glPopMatrix();
+
+	for (int k = 0; k < MAX_ENEMIES; k++) {
+		if (g.enemies[k].valid_enemy == 1) {
+			glColor3fv(g.enemies[k].color);
+			glPushMatrix();
+			glTranslatef(g.enemies[k].pos[0], g.enemies[k].pos[1],
+				g.enemies[k].pos[2]);
+			//float angle = atan2(ship.dir[1], ship.dir[0]);
+			glRotatef(g.enemies[k].angle, 0.0f, 0.0f, 1.0f);
+			glBegin(GL_TRIANGLES);
+			//glVertex2f(-10.0f, -10.0f);
+			//glVertex2f(  0.0f, 20.0f);
+			//glVertex2f( 10.0f, -10.0f);
+			glVertex2f(-12.0f, -10.0f);
+			glVertex2f(  0.0f, 20.0f);
+			glVertex2f(  0.0f, -6.0f);
+			glVertex2f(  0.0f, -6.0f);
+			glVertex2f(  0.0f, 20.0f);
+			glVertex2f( 12.0f, -10.0f);
+			glEnd();
+			glColor3f(1.0f, 0.0f, 0.0f);
+			glBegin(GL_POINTS);
+			glVertex2f(0.0f, 0.0f);
+			glEnd();
+			glPopMatrix();
+			}
+
+	}
+
 	if (gl.keys[XK_Up] || g.mouseThrustOn) {
 		int i;
 		//draw thrust
@@ -985,6 +1130,26 @@ void render()
 	//Draw the bullets
 	for (int i=0; i<g.nbullets; i++) {
 		Bullet *b = &g.barr[i];
+		//Log("draw bullet...\n");
+		glColor3f(1.0, 1.0, 1.0);
+		glBegin(GL_POINTS);
+		glVertex2f(b->pos[0],      b->pos[1]);
+		glVertex2f(b->pos[0]-1.0f, b->pos[1]);
+		glVertex2f(b->pos[0]+1.0f, b->pos[1]);
+		glVertex2f(b->pos[0],      b->pos[1]-1.0f);
+		glVertex2f(b->pos[0],      b->pos[1]+1.0f);
+		glColor3f(0.8, 0.8, 0.8);
+		glVertex2f(b->pos[0]-1.0f, b->pos[1]-1.0f);
+		glVertex2f(b->pos[0]-1.0f, b->pos[1]+1.0f);
+		glVertex2f(b->pos[0]+1.0f, b->pos[1]-1.0f);
+		glVertex2f(b->pos[0]+1.0f, b->pos[1]+1.0f);
+		glEnd();
+	}
+
+	//Draw the bullets
+	for (int i=0; i<g.ebullets; i++) {
+		Bullet *b = &g.ebarr[i];
+		//std::cout << "Drawing enemy bullet" << std::endl;
 		//Log("draw bullet...\n");
 		glColor3f(1.0, 1.0, 1.0);
 		glBegin(GL_POINTS);

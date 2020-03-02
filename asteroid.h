@@ -21,6 +21,16 @@ public:
 
 };
 
+class Ship {
+public:
+        Vec dir;
+        Vec pos;
+        Vec vel;
+        float angle;
+        float color[3];
+        bool valid_enemy; 
+        int numbullets;	
+};
 
 
 
