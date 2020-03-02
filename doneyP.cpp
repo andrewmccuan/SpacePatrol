@@ -5,6 +5,7 @@
 
 #include <GL/glx.h>
 #include "fonts.h"
+#include "image.h"
 
 // Friday changed text color
 void renderDoneyTextCredits(int yres, int xres)
@@ -26,7 +27,15 @@ void renderTGIF (int yres, int xres)
     ggprint8b(&r, 75, 0x8926DD, "TGIF - Thank God Its Friday");
 }
 
+//Image doneyImg = "./images/doneyImg.png";
 
-
-
-    
+void renderDoneyImage(GLuint texture, int yres, int xres)
+{
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0f, 1.0f); glVertex2i(0,0);
+    glTexCoord2f(0.0f, 0.0f); glVertex2i(0,yres);
+    glTexCoord2f(1.0f, 0.0f); glVertex2i(xres,yres);
+    glTexCoord2f(1.0f, 1.0f); glVertex2i(xres,0);
+    glEnd();
+}

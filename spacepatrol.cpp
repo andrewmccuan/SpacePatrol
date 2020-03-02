@@ -1,6 +1,7 @@
 //
-//program: asteroids.cpp
+//program: spacepatrol.cpp
 //author:  Gordon Griesel
+//Edited by:  Andrew McCuan, Will Sparks, Doney Peters, Raag Patel
 //date:    2014 - 2018
 //mod spring 2015: added constructors
 //This program is a game starting point for a 3350 project.
@@ -20,6 +21,7 @@
 #include <GL/glx.h>
 #include "log.h"
 #include "fonts.h"
+#include "image.h"
 
 //defined types
 typedef float Flt;
@@ -56,60 +58,55 @@ extern double timeDiff(struct timespec *start, struct timespec *end);
 extern void timeCopy(struct timespec *dest, struct timespec *source);
 //-----------------------------------------------------------------------------
 
-class Image {
-public:
-    int width, height;
-    unsigned char *data;
-    ~Image() { delete [] data; }
-    Image(const char *fname) {
-        if (fname[0] == '\0')
-            return;
-        //printf("fname **%s**\n", fname);
-        int ppmFlag = 0;
-        char name[40];
-        strcpy(name, fname);
-        int slen = strlen(name);
-        char ppmname[80];
-        if (strncmp(name+(slen-4), ".ppm", 4) == 0)
-            ppmFlag = 1;
-        if (ppmFlag) {
-            strcpy(ppmname, name);
-        } else {
-            name[slen-4] = '\0';
-            //printf("name **%s**\n", name);
-            sprintf(ppmname,"%s.ppm", name);
-            //printf("ppmname **%s**\n", ppmname);
-            char ts[100];
-            //system("convert eball.jpg eball.ppm");
-            sprintf(ts, "convert %s %s", fname, ppmname);
-            system(ts);
-        }
-        //sprintf(ts, "%s", name);
-        FILE *fpi = fopen(ppmname, "r");
-        if (fpi) {
-            char line[200];
-            fgets(line, 200, fpi);
-            fgets(line, 200, fpi);
-            //skip comments and blank lines
-            while (line[0] == '#' || strlen(line) < 2)
-                fgets(line, 200, fpi);
-            sscanf(line, "%i %i", &width, &height);
-            fgets(line, 200, fpi);
-            //get pixel data
-            int n = width * height * 3;
-            data = new unsigned char[n];
-            for (int i=0; i<n; i++)
-                data[i] = fgetc(fpi);
-            fclose(fpi);
-        } else {
-            printf("ERROR opening image: %s\n",ppmname);
-            exit(0);
-        }
-        if (!ppmFlag)
-            unlink(ppmname);
+Image:: ~Image() { delete [] data; }
+Image::Image(const char *fname) {
+    if (fname[0] == '\0')
+        return;
+    //printf("fname **%s**\n", fname);
+    int ppmFlag = 0;
+    char name[40];
+    strcpy(name, fname);
+    int slen = strlen(name);
+    char ppmname[80];
+    if (strncmp(name+(slen-4), ".ppm", 4) == 0)
+        ppmFlag = 1;
+    if (ppmFlag) {
+        strcpy(ppmname, name);
+    } else {
+        name[slen-4] = '\0';
+        //printf("name **%s**\n", name);
+        sprintf(ppmname,"%s.ppm", name);
+        //printf("ppmname **%s**\n", ppmname);
+        char ts[100];
+        //system("convert eball.jpg eball.ppm");
+        sprintf(ts, "convert %s %s", fname, ppmname);
+        system(ts);
     }
-};
-//Image doneyImg = "./images/doneyImg.png";
+    //sprintf(ts, "%s", name);
+    FILE *fpi = fopen(ppmname, "r");
+    if (fpi) {
+        char line[200];
+        fgets(line, 200, fpi);
+        fgets(line, 200, fpi);
+        //skip comments and blank lines
+        while (line[0] == '#' || strlen(line) < 2)
+            fgets(line, 200, fpi);
+        sscanf(line, "%i %i", &width, &height);
+        fgets(line, 200, fpi);
+        //get pixel data
+        int n = width * height * 3;
+        data = new unsigned char[n];
+        for (int i=0; i<n; i++)
+            data[i] = fgetc(fpi);
+        fclose(fpi);
+    } else {
+        printf("ERROR opening image: %s\n",ppmname);
+        exit(0);
+    }
+    if (!ppmFlag)
+        unlink(ppmname);
+}
+Image doneyImg = "./images/doneyImage.png";
 //Image img [4]= {
 //"./images/pic.png",
 //"./images/pic.png",
@@ -124,6 +121,7 @@ public:
 	int tgif = 0;
 	int xres, yres;
 	char keys[65536];
+	GLuint doneyTexture;
 	Global() {
 		xres = 1250;
 		yres = 900;
@@ -370,8 +368,8 @@ void raag_text(int, int);
 void renderDoneyTextCredits(int, int);
 void draw_will_text(int, int);
 void andrew_credit_text(int, int);
-void genAndBindDoneyImage();
-void renderDoneyImage();
+//void genAndBindDoneyImage();
+void renderDoneyImage(GLuint, int, int);
 void init_opengl(void);
 void check_mouse(XEvent *e);
 int check_keys(XEvent *e);
@@ -436,20 +434,20 @@ void init_opengl(void)
 	//Do this to allow fonts
 	glEnable(GL_TEXTURE_2D);
 	initialize_fonts();
-    
+
     // Render Doney's Image
     //------------------------------------------------------------------
-	//glGenTextures(1, &doney);
     //Code borrowed from Gordon Greisel.
-	//int w = doneyImg.width;
-    //int h = doneyImg.height;
-    //
-    //glBindTexture(GL_TEXTURE_2D, doney);
-    //
-    //glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    //glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    //glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
-    //    GL_RGB, GL_UNSIGNED_BYTE, doneyImg.data);
+	glGenTextures(1, &gl.doneyTexture);
+	int w = doneyImg.width;
+    int h = doneyImg.height;
+    
+    glBindTexture(GL_TEXTURE_2D, gl.doneyTexture);
+    
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
+        GL_RGB, GL_UNSIGNED_BYTE, doneyImg.data);
     //------------------------------------------------------------------
 }
 
@@ -899,6 +897,7 @@ void render()
     if (gl.credits == 1) {
         andrew_credit_text(gl.yres, gl.xres);
         renderDoneyTextCredits(gl.yres, gl.xres);
+		renderDoneyImage(gl.doneyTexture, gl.yres, gl.xres);
         draw_will_text(gl.yres, gl.xres);
         raag_text(gl.yres, gl.xres);
     }
@@ -910,7 +909,6 @@ void render()
         renderTGIF(gl.yres, gl.xres);
     }
 
-    //renderDoneyImage();
 	//-------------------------------------------------------------------------
 	//Draw the ship
 	glColor3fv(g.ship.color);
