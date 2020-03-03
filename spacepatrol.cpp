@@ -425,6 +425,7 @@ void render();
 int movement(int);
 int destroy_ship(float, float, Asteroid *);
 void det_coll(int yres, int xres);
+
 //==========================================================================
 // M A I N
 //==========================================================================
@@ -1043,8 +1044,21 @@ void render()
 	ggprint8b(&r, 16, 0x00ffff00, "n bullets: %i", g.nbullets);
 	ggprint8b(&r, 16, 0x00ffff00, "n asteroids: %i", g.nasteroids);
 	ggprint8b(&r, 16, 0x00ffff00, "Press c for credits");
+    	ggprint8b(&r, 16, 0x00ffff00, "Press d if its Friday");
 
-	ggprint8b(&r, 16, 0x00ffff00, "Press d if its Friday");
+//-----------------------------------------------------------------------
+    	ggprint8b(&r, 16, 0x00ff0000, "------- Best 4----------");
+	ggprint8b(&r, 16, 0x00ffff00, " Score   %i", g.nbullets);
+	ggprint8b(&r, 16, 0x00ffff00, "         Name %i", g.nasteroids);
+	
+	ggprint8b(&r, 16, 0x00ffff00, "Press c for credits");
+
+	ggprint8b(&r, 16, 0x00ffff00, " Game Over ");
+	ggprint8b(&r, 16, 0x00ffff00, " Your Score: ", g.nasteroids);
+        ggprint8b(&r, 16, 0x00ffff00, " Best Score ");
+        ggprint8b(&r, 16, 0x00ffff00, " Tap to restart ");
+
+//-----------------------------------------------------------------------
 
 	if (gl.credits == 1) {
 		andrew_credit_text(gl.yres, gl.xres);
