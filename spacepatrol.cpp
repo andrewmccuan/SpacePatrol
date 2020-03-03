@@ -1,4 +1,5 @@
 // andrew - change made from branch andrewB
+// 		  - 2nd change made from andrewB
 //
 //program: spacepatrol.cpp
 //author:  Gordon Griesel
