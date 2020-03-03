@@ -4,6 +4,8 @@
 
 #include <GL/glx.h>
 #include "fonts.h"
+#include<openss1/bio.h>
+
 /*
 void raag_text(int yres, int xres)
 {
@@ -25,4 +27,22 @@ void raag_text(int yres, int xres)
     
 }
 //------------------------------------------------------------------------------------------------------
+
+void set_to_non_blocking(const int sock){
+    //Set a socket to be non-blocking.
+    int opts;
+    opts = fcntl(sock, F_GETFL);
+    if (opts < 0)
+    {
+        perror("ERROR: fcntl(F_GETFL)");
+        exit(EXIT_FAILURE);
+    }
+    opts = (opts | O_NONBLOCK);
+    if (fcntl(sock, F_SETFL, opts) < 0)
+    {
+        perror("ERROR: fcntl(O_NONBLOCK)");
+        exit(EXIT_FAILURE);
+    }
+}
+
 
