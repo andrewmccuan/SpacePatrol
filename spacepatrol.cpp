@@ -997,6 +997,7 @@ void physics()
 				b->color[1] = 1.0f;
 				b->color[2] = 1.0f;
 				g.nbullets++;
+				++g.score;
 			}
 		}
 	}
