@@ -1,10 +1,8 @@
 // Created Raag Patel
 // 02/17/2020
 
-
 #include <GL/glx.h>
 #include "fonts.h"
-#include <openssl/crypto.h>
 #include <openssl/x509.h>
 #include <openssl/pem.h>
 #include <openssl/ssl.h>
