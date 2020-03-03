@@ -26,6 +26,12 @@
 #include "log.h"
 #include "fonts.h"
 #include "image.h"
+#include <openssl/crypto.h>                                              
+#include <openssl/x509.h>                                                
+#include <openssl/pem.h>                                                 
+#include <openssl/ssl.h>                                                 
+#include <openssl/err.h>
+
 
 //defined types
 typedef float Flt;
@@ -139,6 +145,7 @@ public:
 	int collision_det = 0;
 	int tgif = 0;
 	int xres, yres;
+	int save_score;
 	char keys[65536];
 	GLuint doneyTexture;
 	Texture tex; //From "background" framework
@@ -212,6 +219,7 @@ public:
 	Bullet *ebarr;
 	int nships;
 	int nasteroids;
+	int score;
 	int nbullets;
 	int ebullets;
 	int nenemies;
@@ -221,7 +229,7 @@ public:
 	bool mouseThrustOn;
 public:
 	Game() {
-
+		score = 0;
 		ahead = NULL;
 		barr = new Bullet[MAX_BULLETS];
 		ebarr = new Bullet[100];
@@ -405,6 +413,9 @@ public:
 	}
 } x11(0, 0);
 
+
+
+
 //function prototypes
 void renderTGIF (int, int);
 void raag_text(int, int);
@@ -426,7 +437,10 @@ void render();
 int movement(int);
 int destroy_ship(float, float, Asteroid *);
 void det_coll(int yres, int xres);
-
+extern void set_to_non_blocking(const int sock);
+extern void show_cert_data(SSL *ssl, BIO *outbio, const char *hostname);
+extern BIO *ssl_setup_bio(void);
+int high_score(int score);
 //==========================================================================
 // M A I N
 //==========================================================================
@@ -572,6 +586,7 @@ void check_mouse(XEvent *e)
 					b->color[1] = 1.0f;
 					b->color[2] = 1.0f;
 					++g.nbullets;
+					++g.score;
 				}
 			}
 		}
@@ -669,6 +684,10 @@ int check_keys(XEvent *e)
 		case XK_d:
 			gl.tgif = gl.tgif ^ 1;
 			break;
+		case XK_h:
+			gl.save_score = gl.save_score ^ 1;
+			break;
+
 	}
 	return 0;
 }
@@ -1049,7 +1068,7 @@ void render()
 
 //-----------------------------------------------------------------------
     	ggprint8b(&r, 16, 0x00ff0000, "------- Best 4----------");
-	ggprint8b(&r, 16, 0x00ffff00, " Score   %i", g.nbullets);
+	ggprint8b(&r, 16, 0x00ffff00, " Score   %i", g.score);
 	ggprint8b(&r, 16, 0x00ffff00, "         Name %i", g.nasteroids);
 	
 	ggprint8b(&r, 16, 0x00ffff00, "Press c for credits");
@@ -1067,7 +1086,12 @@ void render()
 		renderDoneyImage(gl.doneyTexture, gl.yres, gl.xres);
 		draw_will_text(gl.yres, gl.xres);
 		raag_text(gl.yres, gl.xres);
-    }
+	}
+
+	if (gl.save_score == 1) {
+		high_score(g.score);
+		gl.save_score = gl.save_score ^ 1;
+	}
 
 	if (gl.collision_det == 1) {
 		det_coll(gl.yres, gl.xres);
@@ -1075,6 +1099,7 @@ void render()
     
 	if (gl.tgif == 1) {
 		renderTGIF(gl.yres, gl.xres);
+		high_score(g.score);
 	}
 
 
