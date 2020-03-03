@@ -3,7 +3,10 @@
 // Final Project
 
 #include <GL/glx.h>
+#include <unistd.h>
+#include <stdio.h>
 #include "fonts.h"
+#include "image.h"
 
 /*
 Image andrewImg = "./images/andrewImg.png";
@@ -41,6 +44,29 @@ void andrew_creditPic()
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 */
+
+//Sets up and binds the background texture
+void andrewBackImg(GLuint texture, int xres, int yres, float xc[], float yc[])
+{
+	glColor3f(1.0, 1.0, 1.0);
+	glPushMatrix();
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glBegin(GL_QUADS);
+		glTexCoord2f(xc[0], yc[1]); glVertex2i(0, 0);
+		glTexCoord2f(xc[0], yc[0]); glVertex2i(0, yres);
+		glTexCoord2f(xc[1], yc[0]); glVertex2i(xres, yres);
+		glTexCoord2f(xc[1], yc[1]); glVertex2i(xres, 0);
+	glEnd();
+	glPopMatrix();
+}
+
+//Moves the Background Texture with
+//every physics call
+void andrewBackImgMove(float* xc)
+{
+	xc[0] += 0.0005;
+	xc[1] += 0.0005;
+}
 
 void andrew_credit_text(int yres, int xres)
 {

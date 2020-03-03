@@ -109,12 +109,25 @@ Image::Image(const char *fname) {
         unlink(ppmname);
 }
 Image doneyImg = "./images/doneyImage.png";
+Image img[1] = { 
+"./images/sp_background.png"
+};
 //Image img [4]= {
 //"./images/pic.png",
 //"./images/pic.png",
 //"./images/pic.png",
 //"./images/pic.png"
 //};
+
+//--- From "background" framework ---
+class Texture {
+public:
+	Image *backImage;
+	GLuint backTexture;
+	float xc[2];
+	float yc[2];
+};
+//-----------------------------------
 
 class Global {
 public:
@@ -124,6 +137,7 @@ public:
 	int xres, yres;
 	char keys[65536];
 	GLuint doneyTexture;
+	Texture tex; //From "background" framework
 	Global() {
 		xres = 1250;
 		yres = 900;
@@ -393,6 +407,8 @@ void raag_text(int, int);
 void renderDoneyTextCredits(int, int);
 void draw_will_text(int, int);
 void andrew_credit_text(int, int);
+void andrewBackImg(GLuint texture, int xres, int yres, float xc[], float yc[]);
+void andrewBackImgMove(float* xc);
 //void genAndBindDoneyImage();
 void renderDoneyImage(GLuint, int, int);
 void genAndBindDoneyImage();
@@ -463,10 +479,13 @@ void init_opengl(void)
 	glEnable(GL_TEXTURE_2D);
 	initialize_fonts();
 
+	gl.tex.backImage = &img[0];
+	glGenTextures(1, &gl.tex.backTexture);
+	glGenTextures(1, &gl.doneyTexture);
+
     // Render Doney's Image
     //------------------------------------------------------------------
     //Code borrowed from Gordon Greisel.
-	glGenTextures(1, &gl.doneyTexture);
 	int w = doneyImg.width;
     int h = doneyImg.height;
     
@@ -477,6 +496,20 @@ void init_opengl(void)
     glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
         GL_RGB, GL_UNSIGNED_BYTE, doneyImg.data);
     //------------------------------------------------------------------
+	// Background Image
+	//--- From "background" framework ---
+	int w0 = gl.tex.backImage->width;
+	int h0 = gl.tex.backImage->height;
+	glBindTexture(GL_TEXTURE_2D, gl.tex.backTexture);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, w0, h0, 0,
+							GL_RGB, GL_UNSIGNED_BYTE, img[0].data);
+	gl.tex.xc[0] = 0.0;
+	gl.tex.xc[1] = 0.25;
+	gl.tex.yc[0] = 0.0;
+	gl.tex.yc[1] = 1.0;
+	//------------------------------------------------------------------
 }
 
 void normalize2d(Vec v)
@@ -690,6 +723,9 @@ void buildAsteroidFragment(Asteroid *ta, Asteroid *a)
 
 void physics()
 {
+	//Moves the background
+	andrewBackImgMove(gl.tex.xc);
+
 	Flt d0,d1,dist;
 	//Update ship position
 	g.ship.pos[0] += g.ship.vel[0];
@@ -990,8 +1026,12 @@ void enemy_bullets()
 
 void render()
 {
-	Rect r;
 	glClear(GL_COLOR_BUFFER_BIT);
+	//------------------------------------------------------------------------
+	//Background Texture
+	andrewBackImg(gl.tex.backTexture, gl.xres, gl.yres, gl.tex.xc, gl.tex.yc);
+
+	Rect r;
 	//
 	r.bot = gl.yres - 20;
 	r.left = 10;
@@ -1010,8 +1050,6 @@ void render()
 		draw_will_text(gl.yres, gl.xres);
 		raag_text(gl.yres, gl.xres);
     }
-
-
 
 	if (gl.collision_det == 1) {
 		det_coll(gl.yres, gl.xres);
@@ -1165,7 +1203,5 @@ void render()
 		glVertex2f(b->pos[0]+1.0f, b->pos[1]+1.0f);
 		glEnd();
 	}
+
 }
-
-
-
