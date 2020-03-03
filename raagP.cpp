@@ -4,7 +4,7 @@
 
 #include <GL/glx.h>
 #include "fonts.h"
-#include<openss1/bio.h>
+
 
 /*
 void raag_text(int yres, int xres)
