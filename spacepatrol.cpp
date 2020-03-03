@@ -1,8 +1,5 @@
 // andrew - change made from branch andrewB
-
-//
 //raag - change made from branch b1
-
 // Doney - changed made from branch master_doney_lab7
 
 //program: spacepatrol.cpp
