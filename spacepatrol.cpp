@@ -1,5 +1,5 @@
 // andrew - change made from branch andrewB
-//
+// Doney - changed made from branch master_doney_lab7
 //program: spacepatrol.cpp
 //author:  Gordon Griesel
 //Edited by:  Andrew McCuan, Will Sparks, Doney Peters, Raag Patel
