@@ -4,7 +4,17 @@
 
 #include <GL/glx.h>
 #include "fonts.h"
-#include<openss1/bio.h>
+#include <openssl/crypto.h>
+#include <openssl/x509.h>
+#include <openssl/pem.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <fcntl.h>
 
 /*
 void raag_text(int yres, int xres)
