@@ -154,7 +154,6 @@ public:
 	int save_score;
 	int help = 0;
 	int xres, yres;
-	int save_score;
 	char keys[65536];
 	GLuint doneyTexture;
 	Texture tex; //From "background" framework
