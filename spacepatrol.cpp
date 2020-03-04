@@ -1080,13 +1080,13 @@ void render()
 
 	//Revision needed
 	//-----------------------------------------------------------------------
-    ggprint8b(&r, 16, 0x00ff0000, "------- Best 4----------");
+	ggprint8b(&r, 16, 0x00ff0000, "------- Best 4----------");
 	ggprint8b(&r, 16, 0x00ffff00, " Score   %i", g.score);
-	ggprint8b(&r, 16, 0x00ffff00, "         Name %i", g.nasteroids);
+	ggprint8b(&r, 16, 0x00ffff00, " Name ");
 	ggprint8b(&r, 16, 0x00ffff00, " Game Over ");
-	ggprint8b(&r, 16, 0x00ffff00, " Your Score: ", g.nasteroids);
-    ggprint8b(&r, 16, 0x00ffff00, " Best Score ");
-    ggprint8b(&r, 16, 0x00ffff00, " Tap to restart ");
+	ggprint8b(&r, 16, 0x00ffff00, " Your Score %i ", g.score);
+    	ggprint8b(&r, 16, 0x00ffff00, " Best Score ");
+    	ggprint8b(&r, 16, 0x00ffff00, " Tap to restart ");
 	//-----------------------------------------------------------------------
 
 	if (gl.help == 1) {
