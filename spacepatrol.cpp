@@ -26,6 +26,12 @@
 #include "log.h"
 #include "fonts.h"
 #include "image.h"
+#include <openssl/crypto.h>                                              
+#include <openssl/x509.h>                                                
+#include <openssl/pem.h>                                                 
+#include <openssl/ssl.h>                                                 
+#include <openssl/err.h>
+
 
 #include <openssl/crypto.h>                                              
 #include <openssl/x509.h>                                                
@@ -148,6 +154,7 @@ public:
 	int save_score;
 	int help = 0;
 	int xres, yres;
+	int save_score;
 	char keys[65536];
 	GLuint doneyTexture;
 	Texture tex; //From "background" framework
@@ -1099,7 +1106,12 @@ void render()
 		renderDoneyTextCredits(gl.yres, gl.xres);
 		draw_will_text(gl.yres, gl.xres);
 		raag_text(gl.yres, gl.xres);
-    }
+	}
+
+	if (gl.save_score == 1) {
+		high_score(g.score);
+		gl.save_score = gl.save_score ^ 1;
+	}
 
 	if (gl.save_score == 1) {
 		high_score(g.score);
