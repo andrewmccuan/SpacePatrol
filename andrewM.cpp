@@ -52,7 +52,6 @@ void andrew_creditPic()
 }
 */
 
-///*
 void show_cert_data(SSL *ssl, BIO *outbio, const char *hostname) 
 {
 	//Display ssl certificate data here.
@@ -78,7 +77,6 @@ void show_cert_data(SSL *ssl, BIO *outbio, const char *hostname)
 		fprintf(stderr, "ERROR: BIO_printf\n");
 	printf("--------------------------------------------------------------\n");
 }
-//*/
 
 //Sets up and binds the background texture
 void andrewBackImg(GLuint texture, int xres, int yres, float xc[], float yc[])
@@ -121,7 +119,7 @@ void andrewHelpMenu(int yres, int xres, int bot)
 	int x1 = 5;
 	int x2 = 180;
 	int y1 = 5;
-	int y2 = 140;
+	int y2 = 160;
 	glColor3f(0.0, 1.0, 1.0);
 	glBegin(GL_QUADS);
     	glVertex2f((xres - x1), (yres - y1));
@@ -147,9 +145,42 @@ void andrewHelpMenu(int yres, int xres, int bot)
 	ggprint8b(&r, 16, 0x0000ffff, "Keys:");
 	ggprint8b(&r, 16, 0x0000ffff, "[Arrow Keys] Move");
 	ggprint8b(&r, 16, 0x0000ffff, "[Space] Shoot");
+	ggprint8b(&r, 16, 0x0000ffff, "[TAB] Highscore (Save Score)");
 	ggprint8b(&r, 16, 0x0000ffff, "[P] Highscore (Save Score)");
 	ggprint8b(&r, 16, 0x0000ffff, "[H] Toggle Help Menu");
 	ggprint8b(&r, 16, 0x0000ffff, "[C] Credits");
 	ggprint8b(&r, 16, 0x0000ffff, "[D] if its Friday");
 	
+}
+
+void andrewHighscoreBox(int yres, int xres, int score)
+{
+	int x1 = 75;
+	//int x2 = 200;
+	int y1 = 25;
+	int y2 = 125;
+	glColor3f(1.0, 1.0, 0.0);
+	glBegin(GL_QUADS);
+    	glVertex2f(((xres / 2) + x1), (yres - y1));
+    	glVertex2f(((xres / 2) - x1), (yres - y1));
+    	glVertex2f(((xres / 2) - x1), (yres - (y1 + 16)));
+    	glVertex2f(((xres / 2) + x1), (yres - (y1 + 16)));
+	glEnd();
+	glColor3f(1.0, 1.0, 1.0);
+	glBegin(GL_LINE_LOOP);
+    	glVertex2f(((xres / 2) + x1), (yres - y1));
+    	glVertex2f(((xres / 2) - x1), (yres - y1));
+    	glVertex2f(((xres / 2) - x1), (yres - y2));
+    	glVertex2f(((xres / 2)+ x1), (yres - y2));
+	glEnd();
+
+	Rect r;
+	r.bot = yres - (y1 + 15);
+	//r.left = 10;
+	r.left = xres/2 - 40;
+	r.center = 0;
+	ggprint8b(&r, 16, 0x00000000, "Scoreboard [TAB]");
+	ggprint8b(&r, 16, 0x00ffff00, "Your Score - %d", score);
+	ggprint8b(&r, 16, 0x00ffff00, "Best Score - %d", score);
+
 }

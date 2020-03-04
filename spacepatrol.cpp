@@ -154,7 +154,6 @@ public:
 	int save_score;
 	int help = 0;
 	int xres, yres;
-	int save_score;
 	char keys[65536];
 	GLuint doneyTexture;
 	Texture tex; //From "background" framework
@@ -432,6 +431,7 @@ void andrew_credit_text(int, int);
 void andrewBackImg(GLuint texture, int xres, int yres, float xc[], float yc[]);
 void andrewBackImgMove(float* xc);
 void andrewHelpMenu(int, int, int);
+void andrewHighscoreBox(int, int, int);
 //void genAndBindDoneyImage();
 void renderDoneyImage(GLuint, int, int);
 void genAndBindDoneyImage();
@@ -695,11 +695,9 @@ int check_keys(XEvent *e)
 		case XK_h:
 			gl.help = gl.help ^ 1;
 			break;
-		/*
-		case XK_p:
+		case XK_Tab:
 			gl.highscore = gl.highscore ^ 1;
 			break;
-		*/
 		case XK_p:
 			gl.save_score = gl.save_score ^ 1;
 			break;
@@ -1100,6 +1098,7 @@ void render()
 		ggprint8b(&r, 16, 0x00ff4500, "[H] Help Menu");
 	}
 
+
 	if (gl.credits == 1) {
 		renderDoneyImage(gl.doneyTexture, gl.yres, gl.xres);
 		andrew_credit_text(gl.yres, gl.xres);
@@ -1107,10 +1106,8 @@ void render()
 		draw_will_text(gl.yres, gl.xres);
 		raag_text(gl.yres, gl.xres);
 	}
-
-	if (gl.save_score == 1) {
-		high_score(g.score);
-		gl.save_score = gl.save_score ^ 1;
+	if (gl.highscore == 1) {
+		andrewHighscoreBox(gl.yres, gl.xres, g.score);
 	}
 
 	if (gl.save_score == 1) {
