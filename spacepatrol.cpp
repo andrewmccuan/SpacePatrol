@@ -156,6 +156,7 @@ public:
 	int xres, yres;
 	char keys[65536];
 	GLuint creditTexture;
+	Texture tex; //From "brackground" framework
 	Global() {
 		xres = 1250;
 		yres = 900;
@@ -507,7 +508,6 @@ void init_opengl(void)
 
 	gl.tex.backImage = &img[0];
 	glGenTextures(1, &gl.tex.backTexture);
-	glGenTextures(1, &gl.doneyTexture);
 
     // Render Doney's Image
     //------------------------------------------------------------------
@@ -1100,7 +1100,7 @@ void render()
 
 
 	if (gl.credits == 1) {
-		renderDoneyImage(gl.doneyTexture, gl.yres, gl.xres);
+		renderDoneyImage(gl.creditTexture, gl.yres, gl.xres);
 		andrew_credit_text(gl.yres, gl.xres);
 		renderDoneyTextCredits(gl.yres, gl.xres);
 		draw_will_text(gl.yres, gl.xres);
