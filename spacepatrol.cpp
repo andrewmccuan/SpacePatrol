@@ -121,7 +121,7 @@ public:
 	int tgif = 0;
 	int xres, yres;
 	char keys[65536];
-	GLuint doneyTexture;
+	GLuint creditTexture;
 	Global() {
 		xres = 1250;
 		yres = 900;
@@ -438,11 +438,11 @@ void init_opengl(void)
     // Render Doney's Image
     //------------------------------------------------------------------
     //Code borrowed from Gordon Greisel.
-	glGenTextures(1, &gl.doneyTexture);
+	glGenTextures(1, &gl.creditTexture);
 	int w = doneyImg.width;
     int h = doneyImg.height;
     
-    glBindTexture(GL_TEXTURE_2D, gl.doneyTexture);
+    glBindTexture(GL_TEXTURE_2D, gl.creditTexture);
     
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
@@ -889,7 +889,7 @@ void render()
 	r.bot = gl.yres - 20;
 	r.left = 10;
 	r.center = 0;
-	ggprint8b(&r, 16, 0x00ff0000, "3350 - Asteroids");
+	ggprint16(&r, 16, 0x00ff0000, "3350 - Asteroids");
 	ggprint8b(&r, 16, 0x00ffff00, "n bullets: %i", g.nbullets);
 	ggprint8b(&r, 16, 0x00ffff00, "n asteroids: %i", g.nasteroids);
 	ggprint8b(&r, 16, 0x00ffff00, "Press c for credits");
@@ -897,9 +897,9 @@ void render()
     if (gl.credits == 1) {
         andrew_credit_text(gl.yres, gl.xres);
         renderDoneyTextCredits(gl.yres, gl.xres);
-		renderDoneyImage(gl.doneyTexture, gl.yres, gl.xres);
         draw_will_text(gl.yres, gl.xres);
         raag_text(gl.yres, gl.xres);
+		renderDoneyImage(gl.creditTexture, gl.yres, gl.xres);
     }
 
     if (gl.collision_det == 1) {
@@ -932,7 +932,7 @@ void render()
 	glVertex2f(0.0f, 0.0f);
 	glEnd();
 	glPopMatrix();
-	if (gl.keys[XK_Up] || g.mouseThrustOn) {
+	if (gl.keys[XK_Right] || g.mouseThrustOn) {
 		int i;
 		//draw thrust
 		Flt rad = ((g.ship.angle+90.0) / 360.0f) * PI * 2.0;
