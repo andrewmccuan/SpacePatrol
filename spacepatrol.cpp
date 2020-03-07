@@ -156,9 +156,9 @@ public:
 	int help = 0;
 	int xres, yres;
 	char keys[65536];
-	GLuint doneyTexture;
 	GLuint shipTexture;
-	Texture tex; //From "background" framework
+	GLuint creditTexture;
+	Texture tex; //From "brackground" framework
 	Global() {
 		xres = 1250;
 		yres = 900;
@@ -549,7 +549,7 @@ void init_opengl(void)
 	initialize_fonts();
 
 	gl.tex.backImage = &img[0];
-	glGenTextures(1, &gl.doneyTexture);
+	glGenTextures(1, &gl.creditTexture);
 	glGenTextures(1, &gl.tex.backTexture);
 	glGenTextures(1, &gl.shipTexture);
 
@@ -559,7 +559,7 @@ void init_opengl(void)
 	int w = doneyImg.width;
     int h = doneyImg.height;
     
-    glBindTexture(GL_TEXTURE_2D, gl.doneyTexture);
+    glBindTexture(GL_TEXTURE_2D, gl.creditTexture);
     
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
@@ -1158,7 +1158,7 @@ void render()
 
 
 	if (gl.credits == 1) {
-		renderDoneyImage(gl.doneyTexture, gl.yres, gl.xres);
+		renderDoneyImage(gl.creditTexture, gl.yres, gl.xres);
 		andrew_credit_text(gl.yres, gl.xres);
 		renderDoneyTextCredits(gl.yres, gl.xres);
 		draw_will_text(gl.yres, gl.xres);
@@ -1240,7 +1240,7 @@ void render()
 
 	}
 
-	if (gl.keys[XK_Up] || g.mouseThrustOn) {
+	if (gl.keys[XK_Right] || g.mouseThrustOn) {
 		int i;
 		//draw thrust
 		Flt rad = ((g.ship.angle+90.0) / 360.0f) * PI * 2.0;
