@@ -90,7 +90,7 @@ void new_ship(Ship *my_enemy, int countr) {
 		my_enemy->pos[1] = ypos;
 		my_enemy->vel[1] = 3*v2;
 	} else {
-		my_enemy->pos[1] = 1250;
+		my_enemy->pos[1] = 900;
 		my_enemy->vel[1] = -3*v2;
 	}
 
@@ -104,7 +104,9 @@ void new_ship(Ship *my_enemy, int countr) {
 
 	my_enemy->pos[2] = 0.0f;
 }
- 
+
+
+
 int high_score(int score)                                                                                     
 {                  
 	const int MAX_READ_ERRORS = 100;                                                                            
@@ -133,8 +135,11 @@ int high_score(int score)
 	//Setup the SSL BIO                                                                        
 	outbio = ssl_setup_bio();                                                                  
 	//Initialize the SSL library                                                               
-	if(SSL_library_init() < 0) BIO_printf(outbio, "Could not initialize the OpenSSL library !\n");
-		method = SSLv23_client_method();                                                           
+	if (SSL_library_init() < 0) {
+		BIO_printf(outbio, "Could not initialize the OpenSSL library !\n");
+	}
+
+	method = SSLv23_client_method();                                                           
 	ctx = SSL_CTX_new(method);                                                                 
 	SSL_CTX_set_options(ctx, SSL_OP_NO_SSLv2);                                                 
 	//next 2 lines of code are not currently needed.                                           
@@ -149,7 +154,8 @@ int high_score(int score)
 	addr.sin_port = htons(port);                                                               
 	addr.sin_addr.s_addr = *(long*)(host->h_addr);                                             
 	if (connect(sd, (struct sockaddr*)&addr, sizeof(addr)) == -1) {                            
-	    BIO_printf(outbio, "Cannot connect to host %s [%s] on port %d.\n", hostname, inet_ntoa(addr.sin_addr), port);
+		BIO_printf(outbio, "Cannot connect to host %s [%s] on port %d.\n", 
+			hostname, inet_ntoa(addr.sin_addr), port);
 	}                                                                                          
 	//Connect using the SSL certificate.                                                       
 	ssl = SSL_new(ctx);                                                                        
@@ -163,7 +169,8 @@ int high_score(int score)
 	set_to_non_blocking(sd);                                                                   
 	//                                                                                         
 	//Send the http request to the host server.                                                
-	sprintf(req, "GET /%s HTTP/1.1\r\nHost: %s\r\nUser-Agent: %s\r\n\r\n", pagename, hostname, USERAGENT);    
+	sprintf(req, "GET /%s HTTP/1.1\r\nHost: %s\r\nUser-Agent: %s\r\n\r\n",
+	    	pagename, hostname, USERAGENT);    
 	req_len = strlen(req);                                                                     
 	ret = SSL_write(ssl, req, req_len);                                                        
 	if (ret <= 0) {                                                                              
@@ -203,31 +210,4 @@ int high_score(int score)
 	SSL_CTX_free(ctx);                                                                         
 	return 0;                                                                                  
 } 
-
-/*
-void show_cert_data(SSL *ssl, BIO *outbio, const char *hostname) {
-        //Display ssl certificate data here.                                
-        //Get the remote certificate into the X509 structure                
-        printf("------------------------------------------------------------    --\n");
-        printf("Certificate data...\n");
-        X509 *cert;
-        X509_NAME *certname;
-        printf("calling SSL_get_peer_certificate(ssl)\n");
-        cert = SSL_get_peer_certificate(ssl);
-        if (cert == NULL)
-            printf("Error: Could not get a certificate from: %s.\n", hostname);
-        else
-            printf("Retrieved the server's certificate from: %s.\n", hostname);
-        //extract various certificate information                           
-        certname = X509_NAME_new();
-        certname = X509_get_subject_name(cert);
-        //display the cert subject here                                     
-        if (BIO_printf(outbio, "Displaying the certificate subject data:\n")     < 0)
-            fprintf(stderr, "ERROR: BIO_printf\n");
-        X509_NAME_print_ex(outbio, certname, 0, 0);
-        if (BIO_printf(outbio, "\n\n") < 0)
-            fprintf(stderr, "ERROR: BIO_printf\n");
-        printf("------------------------------------------------------------    --\n");
-}
-*/
 

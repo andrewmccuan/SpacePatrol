@@ -283,7 +283,9 @@ public:
 		nenemies = 0;
 		for (int k = 0; k < MAX_ENEMIES; k++) {
 			new_ship(&enemies[k], k);
+			nenemies++;
 			std::cout << "Ship position x: " << enemies[k].pos[0] << std::endl;
+			std::cout << "Ship position Y: " << enemies[k].pos[1] << std::endl;
 		
 			//enemies[k].valid_enemy = 0;
 		}
@@ -821,15 +823,22 @@ void physics()
 	//Moves the background
 	andrewBackImgMove(gl.tex.xc);
 
+
+
 	Flt d0,d1,dist;
 	//Update ship position
 	g.ship.pos[0] += g.ship.vel[0];
 	g.ship.pos[1] += g.ship.vel[1];
-	for (int k = 0; k < MAX_ENEMIES; k++) {
-		g.enemies[k].pos[0] += g.enemies[k].vel[0];
-		g.enemies[k].pos[1] += g.enemies[k].vel[1];	
-
+	
+	for (int k = g.nenemies; k < MAX_ENEMIES; k++) {
+		new_ship(&g.enemies[k], k);
+		g.nenemies++;
+		std::cout << "Ship position x: " << g.enemies[k].pos[0] << std::endl;
+		std::cout << "Ship position y: " << g.enemies[k].pos[1] << std::endl;
+		
+		//enemies[k].valid_enemy = 0;
 	}
+
 	//Check for collision with window edges
 	if (g.ship.pos[0] < 0.0) {
 		g.ship.pos[0] += (float)gl.xres;
@@ -1081,6 +1090,37 @@ void physics()
 		if (tdif < -0.3)
 			g.mouseThrustOn = false;
 	}
+	for (int k = 0; k < MAX_ENEMIES; k++) {
+		g.enemies[k].pos[0] += g.enemies[k].vel[0];
+		g.enemies[k].pos[1] += g.enemies[k].vel[1];
+
+		if (g.enemies[k].pos[0] < 0.0) {
+			g.enemies[k].valid_enemy = 0;
+			memcpy(&g.enemies[k], &g.enemies[g.nenemies-1], sizeof(Ship));	
+			g.nenemies--;
+		}
+		else if (g.enemies[k].pos[0] > (float)gl.xres) {
+			g.enemies[k].valid_enemy = 0;
+			memcpy(&g.enemies[k], &g.enemies[g.nenemies-1], sizeof(Ship));	
+			g.nenemies--;
+		}
+		else if (g.enemies[k].pos[1] < 0) {
+			g.enemies[k].valid_enemy = 0;
+			memcpy(&g.enemies[k], &g.enemies[g.nenemies-1], sizeof(Ship));		
+			g.nenemies--;
+
+		}
+				
+		else if (g.enemies[k].pos[1] > ((float)gl.yres)) {
+			std::cout << g.enemies[k].pos[1] << std::endl;
+			g.enemies[k].valid_enemy = 0;
+			memcpy(&g.enemies[k], &g.enemies[g.nenemies-1], sizeof(Ship));		
+			g.nenemies--;		
+		}
+		
+				
+
+	}
 }
 
 void enemy_bullets() 
@@ -1090,7 +1130,7 @@ void enemy_bullets()
 	clock_gettime(CLOCK_REALTIME, &bt);
 	double ts = timeDiff(&g.ebulletTimer, &bt);
 	
-	if (ts > 0.1) {
+	if (ts > 0.4) {
 		timeCopy(&g.ebulletTimer, &bt);
 		for (int i = 0; i<MAX_ENEMIES; i++) {
 		if (g.ebullets < 100 && g.enemies[i].numbullets < 50) {
