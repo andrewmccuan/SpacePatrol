@@ -167,7 +167,7 @@ void andrewHelpMenu(int yres, int xres, int bot)
 	ggprint8b(&r, 16, 0x0000ffff, "Keys:");
 	ggprint8b(&r, 16, 0x0000ffff, "[Arrow Keys] Move");
 	ggprint8b(&r, 16, 0x0000ffff, "[Space] Shoot");
-	ggprint8b(&r, 16, 0x0000ffff, "[TAB] Highscore (Save Score)");
+	ggprint8b(&r, 16, 0x0000ffff, "[TAB] Highscore (Scoreboard)");
 	ggprint8b(&r, 16, 0x0000ffff, "[P] Highscore (Save Score)");
 	ggprint8b(&r, 16, 0x0000ffff, "[H] Toggle Help Menu");
 	ggprint8b(&r, 16, 0x0000ffff, "[C] Credits");
