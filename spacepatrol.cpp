@@ -125,8 +125,9 @@ Image::Image(const char *fname) {
         unlink(ppmname);
 }
 Image doneyImg = "./images/doneyImage.png";
-Image img[1] = { 
-"./images/sp_background.png"
+Image img[2] = { 
+"./images/sp_background.png",
+"./images/sp_ship512.png"
 };
 //Image img [4]= {
 //"./images/pic.png",
@@ -156,6 +157,7 @@ public:
 	int xres, yres;
 	char keys[65536];
 	GLuint doneyTexture;
+	GLuint shipTexture;
 	Texture tex; //From "background" framework
 	Global() {
 		xres = 1250;
@@ -429,6 +431,7 @@ void renderDoneyTextCredits(int, int);
 void draw_will_text(int, int);
 void andrew_credit_text(int, int);
 void andrewBackImg(GLuint texture, int xres, int yres, float xc[], float yc[]);
+void andrewDrawShip(GLuint texture, float* pos);
 void andrewBackImgMove(float* xc);
 void andrewHelpMenu(int, int, int);
 void andrewHighscoreBox(int, int, int);
@@ -485,6 +488,45 @@ int main()
 	return 0;
 }
 
+//===============================================
+// Imported from (rainforest framework)
+//===============================================
+unsigned char *buildAlphaData(Image *img)
+{
+	//add 4th component to RGB stream...
+	int i;
+	int a,b,c;
+	unsigned char *newdata, *ptr;
+	unsigned char *data = (unsigned char *)img->data;
+	newdata = (unsigned char *)malloc(img->width * img->height * 4);
+	ptr = newdata;
+	for (i=0; i<img->width * img->height * 3; i+=3) {
+		a = *(data+0);
+		b = *(data+1);
+		c = *(data+2);
+		*(ptr+0) = a;
+		*(ptr+1) = b;
+		*(ptr+2) = c;
+		//-----------------------------------------------
+		//get largest color component...
+		//*(ptr+3) = (unsigned char)((
+		//		(int)*(ptr+0) +
+		//		(int)*(ptr+1) +
+		//		(int)*(ptr+2)) / 3);
+		//d = a;
+		//if (b >= a && b >= c) d = b;
+		//if (c >= a && c >= b) d = c;
+		//*(ptr+3) = d;
+		//-----------------------------------------------
+		//this code optimizes the commented code above.
+		*(ptr+3) = (a|b|c);
+		//-----------------------------------------------
+		ptr += 4;
+		data += 3;
+	}
+	return newdata;
+}
+
 void init_opengl(void)
 {
 	//OpenGL initialization
@@ -507,8 +549,9 @@ void init_opengl(void)
 	initialize_fonts();
 
 	gl.tex.backImage = &img[0];
-	glGenTextures(1, &gl.tex.backTexture);
 	glGenTextures(1, &gl.doneyTexture);
+	glGenTextures(1, &gl.tex.backTexture);
+	glGenTextures(1, &gl.shipTexture);
 
     // Render Doney's Image
     //------------------------------------------------------------------
@@ -536,6 +579,21 @@ void init_opengl(void)
 	gl.tex.xc[1] = 0.25;
 	gl.tex.yc[0] = 0.0;
 	gl.tex.yc[1] = 1.0;
+	//------------------------------------------------------------------
+	// Ship Image
+	// --- From "rainforest" framework ---
+	int w1 = img[1].width;
+	int h1 = img[1].height;
+	glBindTexture(GL_TEXTURE_2D, gl.shipTexture);
+	//
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	//
+	//must build a new set of data...
+	unsigned char *silhouetteData = buildAlphaData(&img[1]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w1, h1, 0,
+							GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
+	free(silhouetteData);
 	//------------------------------------------------------------------
 }
 
@@ -1151,6 +1209,8 @@ void render()
 	glVertex2f(0.0f, 0.0f);
 	glEnd();
 	glPopMatrix();
+	//Draw the ship texture
+	andrewDrawShip(gl.shipTexture, g.ship.pos);
 
 	for (int k = 0; k < MAX_ENEMIES; k++) {
 		if (g.enemies[k].valid_enemy == 1) {

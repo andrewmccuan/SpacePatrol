@@ -90,6 +90,7 @@ void andrewBackImg(GLuint texture, int xres, int yres, float xc[], float yc[])
 		glTexCoord2f(xc[1], yc[0]); glVertex2i(xres, yres);
 		glTexCoord2f(xc[1], yc[1]); glVertex2i(xres, 0);
 	glEnd();
+	glBindTexture(GL_TEXTURE_2D, 0);
 	glPopMatrix();
 }
 
@@ -99,6 +100,27 @@ void andrewBackImgMove(float* xc)
 {
 	xc[0] += 0.0005;
 	xc[1] += 0.0005;
+}
+
+void andrewDrawShip(GLuint texture, float* pos)
+{
+	glColor3f(1.0, 1.0, 0.0);
+	int width=40;
+    glPushMatrix();
+    glTranslatef(pos[0], pos[1], pos[2]);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glEnable(GL_ALPHA_TEST);
+    glAlphaFunc(GL_GREATER, 0.0f);
+    glColor4ub(255,255,255,255);
+    glBegin(GL_QUADS);
+    	glTexCoord2f(0.0f, 1.0f); glVertex2i(-width,-width);
+    	glTexCoord2f(0.0f, 0.0f); glVertex2i(-width, width);
+    	glTexCoord2f(1.0f, 0.0f); glVertex2i( width, width);
+    	glTexCoord2f(1.0f, 1.0f); glVertex2i( width,-width);
+    glEnd();
+	glDisable(GL_ALPHA_TEST);
+	glBindTexture(GL_TEXTURE_2D, 0);
+    glPopMatrix();
 }
 
 void andrew_credit_text(int yres, int xres)
@@ -180,6 +202,7 @@ void andrewHighscoreBox(int yres, int xres, int score)
 	r.left = xres/2 - 40;
 	r.center = 0;
 	ggprint8b(&r, 16, 0x00000000, "Scoreboard [TAB]");
+	r.left = r.left - 5;
 	ggprint8b(&r, 16, 0x00ffff00, "Your Score - %d", score);
 	ggprint8b(&r, 16, 0x00ffff00, "Best Score - %d", score);
 
