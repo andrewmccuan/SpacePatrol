@@ -175,7 +175,7 @@ void andrewHelpMenu(int yres, int xres, int bot)
 	
 }
 
-void andrewHighscoreBox(int yres, int xres, int score)
+void andrewHighscoreBox(int yres, int xres, int score, int high_score)
 {
 	int x1 = 75;
 	//int x2 = 200;
@@ -204,6 +204,6 @@ void andrewHighscoreBox(int yres, int xres, int score)
 	ggprint8b(&r, 16, 0x00000000, "Scoreboard [TAB]");
 	r.left = r.left - 5;
 	ggprint8b(&r, 16, 0x00ffff00, "Your Score - %d", score);
-	ggprint8b(&r, 16, 0x00ffff00, "Best Score - %d", score);
+	ggprint8b(&r, 16, 0x00ffff00, "Best Score - %d", high_score);
 
 }
