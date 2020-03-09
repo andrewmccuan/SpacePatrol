@@ -91,7 +91,7 @@ void andrewShowMenu(GLuint texture1, GLuint texture2, int xres, int yres)
     	glTexCoord2f(0.0f, 1.0f); glVertex2i(0,0);
     	glTexCoord2f(0.0f, 0.0f); glVertex2i(0,yres);
     	glTexCoord2f(1.0f, 0.0f); glVertex2i(xres,yres);
-    	glTexCoord2f(1.0f, 1.0f); glVertex2i(xres,0);
+		glTexCoord2f(1.0f, 1.0f); glVertex2i(xres,0);
     glEnd();
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glPopMatrix();
@@ -105,14 +105,14 @@ void andrewShowMenu(GLuint texture1, GLuint texture2, int xres, int yres)
 	glTranslatef(0.0f,.0f,0.0f);
 	glBindTexture(GL_TEXTURE_2D, texture2);
 	glEnable(GL_ALPHA_TEST);
-    glAlphaFunc(GL_GREATER, 0.0f);
+	glAlphaFunc(GL_GREATER, 0.0f);
 	glRotatef(ang, 0.0f, 1.0f, 0.0f);
-    glBegin(GL_QUADS);
-    	glTexCoord2f(0.0f, 1.0f); glVertex2i(0,0);
-    	glTexCoord2f(0.0f, 0.0f); glVertex2i(0,yres);
-    	glTexCoord2f(1.0f, 0.0f); glVertex2i(xres,yres);
-    	glTexCoord2f(1.0f, 1.0f); glVertex2i(xres,0);
-    glEnd();
+	glBegin(GL_QUADS);
+		glTexCoord2f(0.0f, 1.0f); glVertex2i(0,0);
+		glTexCoord2f(0.0f, 0.0f); glVertex2i(0,yres);
+		glTexCoord2f(1.0f, 0.0f); glVertex2i(xres,yres);
+		glTexCoord2f(1.0f, 1.0f); glVertex2i(xres,0);
+	glEnd();
 	glDisable(GL_ALPHA_TEST);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glPopMatrix();
@@ -149,51 +149,51 @@ void andrewDrawShip(GLuint texture, float* pos)
 {
 	glColor3f(1.0, 1.0, 0.0);
 	int width=40;
-    glPushMatrix();
-    glTranslatef(pos[0], pos[1], pos[2]);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glEnable(GL_ALPHA_TEST);
-    glAlphaFunc(GL_GREATER, 0.0f);
-    glColor4ub(255,255,255,255);
-    glBegin(GL_QUADS);
-    	glTexCoord2f(0.0f, 1.0f); glVertex2i(-width,-width);
-    	glTexCoord2f(0.0f, 0.0f); glVertex2i(-width, width);
-    	glTexCoord2f(1.0f, 0.0f); glVertex2i( width, width);
-    	glTexCoord2f(1.0f, 1.0f); glVertex2i( width,-width);
-    glEnd();
+	glPushMatrix();
+	glTranslatef(pos[0], pos[1], pos[2]);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GREATER, 0.0f);
+	glColor4ub(255,255,255,255);
+	glBegin(GL_QUADS);
+		glTexCoord2f(0.0f, 1.0f); glVertex2i(-width,-width);
+		glTexCoord2f(0.0f, 0.0f); glVertex2i(-width, width);
+		glTexCoord2f(1.0f, 0.0f); glVertex2i( width, width);
+		glTexCoord2f(1.0f, 1.0f); glVertex2i( width,-width);
+	glEnd();
 	glDisable(GL_ALPHA_TEST);
 	glBindTexture(GL_TEXTURE_2D, 0);
-    glPopMatrix();
+	glPopMatrix();
 }
 
 void andrewDrawEnemy(GLuint texture, float* pos)
 {
 	glColor3f(1.0, 1.0, 0.0);
 	int width=30;
-    glPushMatrix();
-    glTranslatef(pos[0], pos[1], pos[2]);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glEnable(GL_ALPHA_TEST);
-    glAlphaFunc(GL_GREATER, 0.0f);
-    glColor4ub(255,255,255,255);
-    glBegin(GL_QUADS);
-    	glTexCoord2f(0.0f, 1.0f); glVertex2i(-width,-width);
-    	glTexCoord2f(0.0f, 0.0f); glVertex2i(-width, width);
-    	glTexCoord2f(1.0f, 0.0f); glVertex2i( width, width);
-    	glTexCoord2f(1.0f, 1.0f); glVertex2i( width,-width);
-    glEnd();
+	glPushMatrix();
+	glTranslatef(pos[0], pos[1], pos[2]);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GREATER, 0.0f);
+	glColor4ub(255,255,255,255);
+	glBegin(GL_QUADS);
+		glTexCoord2f(0.0f, 1.0f); glVertex2i(-width,-width);
+		glTexCoord2f(0.0f, 0.0f); glVertex2i(-width, width);
+		glTexCoord2f(1.0f, 0.0f); glVertex2i( width, width);
+		glTexCoord2f(1.0f, 1.0f); glVertex2i( width,-width);
+	glEnd();
 	glDisable(GL_ALPHA_TEST);
 	glBindTexture(GL_TEXTURE_2D, 0);
-    glPopMatrix();
+	glPopMatrix();
 }
 
 void andrew_credit_text(int yres, int xres)
 {
-    Rect r;
+	Rect r;
 	r.bot = yres - 20;
 	r.left = xres/2;
 	r.center = 0;
-    ggprint8b(&r, 75, 0x0000ffff, "Andrew Mccuan");
+	ggprint8b(&r, 75, 0x0000ffff, "Andrew Mccuan");
 }
 
 void andrewHelpMenu(int yres, int xres, int bot)
@@ -208,17 +208,17 @@ void andrewHelpMenu(int yres, int xres, int bot)
 	int y2 = 160;
 	glColor3f(0.0, 1.0, 1.0);
 	glBegin(GL_QUADS);
-    	glVertex2f((xres - x1), (yres - y1));
-    	glVertex2f((xres - x2), (yres - y1));
-    	glVertex2f((xres - x2), (yres - (y1 + 16)));
-    	glVertex2f((xres - x1), (yres - (y1 + 16)));
+		glVertex2f((xres - x1), (yres - y1));
+		glVertex2f((xres - x2), (yres - y1));
+		glVertex2f((xres - x2), (yres - (y1 + 16)));
+		glVertex2f((xres - x1), (yres - (y1 + 16)));
 	glEnd();
 	glColor3f(1.0, 1.0, 1.0);
 	glBegin(GL_LINE_LOOP);
-    	glVertex2f((xres - x1), (yres - y1));
-    	glVertex2f((xres - x2), (yres - y1));
-    	glVertex2f((xres - x2), (yres - y2));
-    	glVertex2f((xres - x1), (yres - y2));
+		glVertex2f((xres - x1), (yres - y1));
+		glVertex2f((xres - x2), (yres - y1));
+		glVertex2f((xres - x2), (yres - y2));
+		glVertex2f((xres - x1), (yres - y2));
 	glEnd();
 
 	Rect r;
@@ -247,17 +247,17 @@ void andrewHighscoreBox(int yres, int xres, int score, int high_score)
 	int y2 = 125;
 	glColor3f(1.0, 1.0, 0.0);
 	glBegin(GL_QUADS);
-    	glVertex2f(((xres / 2) + x1), (yres - y1));
-    	glVertex2f(((xres / 2) - x1), (yres - y1));
-    	glVertex2f(((xres / 2) - x1), (yres - (y1 + 16)));
-    	glVertex2f(((xres / 2) + x1), (yres - (y1 + 16)));
+		glVertex2f(((xres / 2) + x1), (yres - y1));
+		glVertex2f(((xres / 2) - x1), (yres - y1));
+		glVertex2f(((xres / 2) - x1), (yres - (y1 + 16)));
+		glVertex2f(((xres / 2) + x1), (yres - (y1 + 16)));
 	glEnd();
 	glColor3f(1.0, 1.0, 1.0);
 	glBegin(GL_LINE_LOOP);
-    	glVertex2f(((xres / 2) + x1), (yres - y1));
-    	glVertex2f(((xres / 2) - x1), (yres - y1));
-    	glVertex2f(((xres / 2) - x1), (yres - y2));
-    	glVertex2f(((xres / 2)+ x1), (yres - y2));
+		glVertex2f(((xres / 2) + x1), (yres - y1));
+		glVertex2f(((xres / 2) - x1), (yres - y1));
+		glVertex2f(((xres / 2) - x1), (yres - y2));
+		glVertex2f(((xres / 2)+ x1), (yres - y2));
 	glEnd();
 
 	Rect r;
