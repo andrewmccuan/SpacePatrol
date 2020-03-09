@@ -14,16 +14,18 @@
 #include <netdb.h>
 #include <fcntl.h>
 
-/*
+
 void raag_text(int yres, int xres)
 {
     Rect r;
     r.bot = yres-65;
     r.left = xres/2;
     r.center = 0;
-    ggprint8b(&r,75, 0x4b3ecf, "Raag Patel");
-}*/
-// Friday
+    ggprint8b(&r,75, 0xFFFF3C, "Raag Patel");
+}
+
+
+/*// Friday
 //------------------------------------------------------------------------------------------------------
 void raag_text(int yres, int xres)
 {
@@ -35,7 +37,7 @@ void raag_text(int yres, int xres)
     
 }
 //------------------------------------------------------------------------------------------------------
-
+*/
 void set_to_non_blocking(const int sock){
     //Set a socket to be non-blocking.
     int opts;
