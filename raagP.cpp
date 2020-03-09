@@ -31,7 +31,8 @@ void raag_text(int yres, int xres)
     r.bot = yres-65;
     r.left = xres/2;
     r.center = 0;
-    ggprint8b(&r,75, 0xFFFF3C, "Friday --> The quick brown fox jumps over the la		zy dog --> Raag Patel ");
+    ggprint8b(&r,75, 0xFFFF3C, 
+    "Friday --> The quick brown fox jumps over the lazy dog --> Raag Patel ");
     
 }
 */
