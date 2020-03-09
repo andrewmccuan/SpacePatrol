@@ -125,9 +125,12 @@ Image::Image(const char *fname) {
         unlink(ppmname);
 }
 Image doneyImg = "./images/doneyImage.png";
-Image img[2] = { 
-"./images/sp_background.png",
-"./images/sp_ship512.png"
+Image img[5] = { 
+"./images/sp_background_seamless.png",
+"./images/sp_ship512.png",
+"./images/sp_enemy1.png",
+"./images/sp_menu.png",
+"./images/sp_menuGalaxy.png"
 };
 //Image img [4]= {
 //"./images/pic.png",
@@ -148,6 +151,7 @@ public:
 
 class Global {
 public:
+	int show_menu = 0; 
 	int credits = 0;
 	int collision_det = 0;
 	int tgif = 0;
@@ -157,7 +161,10 @@ public:
 	int xres, yres;
 	char keys[65536];
 	GLuint shipTexture;
+	GLuint enemy1Texture;
 	GLuint creditTexture;
+	GLuint menuTexture;
+	GLuint menuGalTexture;
 	Texture tex; //From "brackground" framework
 	Global() {
 		xres = 1250;
@@ -434,9 +441,11 @@ void draw_will_text(int, int);
 void andrew_credit_text(int, int);
 void andrewBackImg(GLuint texture, int xres, int yres, float xc[], float yc[]);
 void andrewDrawShip(GLuint texture, float* pos);
+void andrewDrawEnemy(GLuint texture, float* pos);
 void andrewBackImgMove(float* xc);
 void andrewHelpMenu(int, int, int);
 void andrewHighscoreBox(int, int, int);
+void andrewShowMenu(GLuint texture1, GLuint texture2, int xres, int yres);
 //void genAndBindDoneyImage();
 void renderDoneyImage(GLuint, int, int);
 void genAndBindDoneyImage();
@@ -554,6 +563,9 @@ void init_opengl(void)
 	glGenTextures(1, &gl.creditTexture);
 	glGenTextures(1, &gl.tex.backTexture);
 	glGenTextures(1, &gl.shipTexture);
+	glGenTextures(1, &gl.enemy1Texture);
+	glGenTextures(1, &gl.menuTexture);
+	glGenTextures(1, &gl.menuGalTexture);
 
     // Render Doney's Image
     //------------------------------------------------------------------
@@ -597,6 +609,50 @@ void init_opengl(void)
 							GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
 	free(silhouetteData);
 	//------------------------------------------------------------------
+	// Enemy Ship Image
+	// --- From "rainforest" framework ---
+	int w2 = img[2].width;
+	int h2 = img[2].height;
+	glBindTexture(GL_TEXTURE_2D, gl.enemy1Texture);
+	//
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	//
+	silhouetteData = buildAlphaData(&img[2]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w2, h2, 0,
+							GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
+	free(silhouetteData);
+	//------------------------------------------------------------------
+	// Menu Image
+	// --- From "rainforest" framework ---
+	//*
+	int w3 = img[3].width;
+	int h3 = img[3].height;
+	glBindTexture(GL_TEXTURE_2D, gl.menuTexture);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, w3, h3, 0,
+        GL_RGB, GL_UNSIGNED_BYTE, img[3].data);
+	//
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w3, h3, 0,
+							GL_RGBA, GL_UNSIGNED_BYTE, img[3].data);
+	//*/
+	//------------------------------------------------------------------
+	// Spinning Galaxy Image
+	// --- From "rainforest" framework ---
+	//*
+	int w4 = img[4].width;
+	int h4 = img[4].height;
+	glBindTexture(GL_TEXTURE_2D, gl.menuGalTexture);
+	//
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	//
+	silhouetteData = buildAlphaData(&img[4]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w4, h4, 0,
+							GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
+	free(silhouetteData);
+	//*/
 }
 
 void normalize2d(Vec v)
@@ -761,6 +817,8 @@ int check_keys(XEvent *e)
 		case XK_p:
 			gl.save_score = gl.save_score ^ 1;
 			break;
+		case XK_m:
+			gl.show_menu = gl.show_menu ^ 1;
 	}
 	return 0;
 }
@@ -1163,6 +1221,7 @@ void enemy_bullets()
 void render()
 {
 	glClear(GL_COLOR_BUFFER_BIT);
+
 	//------------------------------------------------------------------------
 	//Background Texture
 	andrewBackImg(gl.tex.backTexture, gl.xres, gl.yres, gl.tex.xc, gl.tex.yc);
@@ -1195,6 +1254,9 @@ void render()
 		//r.left = gl.xres - 175;
 		ggprint8b(&r, 16, 0x00ff4500, "[H] Help Menu");
 	}
+	//if (gl.show_menu == 1) {
+	//	ggprint8b(&r, 16, 0x00ffff00, " MENU SHOULD BEEN SHOWN ");
+	//}
 
 
 	if (gl.credits == 1) {
@@ -1276,8 +1338,8 @@ void render()
 			glVertex2f(0.0f, 0.0f);
 			glEnd();
 			glPopMatrix();
-			}
-
+			andrewDrawEnemy(gl.enemy1Texture, g.enemies[k].pos);
+		}
 	}
 
 	if (gl.keys[XK_Right] || g.mouseThrustOn) {
@@ -1367,6 +1429,10 @@ void render()
 		glVertex2f(b->pos[0]+1.0f, b->pos[1]-1.0f);
 		glVertex2f(b->pos[0]+1.0f, b->pos[1]+1.0f);
 		glEnd();
+	}
+
+	if (gl.show_menu == 1) {
+		andrewShowMenu(gl.menuTexture, gl.menuGalTexture, gl.xres, gl.yres);
 	}
 
 }

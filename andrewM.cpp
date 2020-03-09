@@ -78,6 +78,49 @@ void show_cert_data(SSL *ssl, BIO *outbio, const char *hostname)
 	printf("--------------------------------------------------------------\n");
 }
 
+void andrewShowMenu(GLuint texture1, GLuint texture2, int xres, int yres)
+{
+	static float ang = 0.0;
+	//Back Image
+	//*
+	
+	glColor3f(1.0, 1.0, 1.0);
+	glPushMatrix();
+	glBindTexture(GL_TEXTURE_2D, texture1);
+    glBegin(GL_QUADS);
+    	glTexCoord2f(0.0f, 1.0f); glVertex2i(0,0);
+    	glTexCoord2f(0.0f, 0.0f); glVertex2i(0,yres);
+    	glTexCoord2f(1.0f, 0.0f); glVertex2i(xres,yres);
+    	glTexCoord2f(1.0f, 1.0f); glVertex2i(xres,0);
+    glEnd();
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glPopMatrix();
+	//*/
+
+	//Front moving Image
+	//*
+	glColor3f(1.0, 1.0, 1.0);
+	glPushMatrix();
+	//glLoadIdentity();
+	glTranslatef(0.0f,.0f,0.0f);
+	glBindTexture(GL_TEXTURE_2D, texture2);
+	glEnable(GL_ALPHA_TEST);
+    glAlphaFunc(GL_GREATER, 0.0f);
+	glRotatef(ang, 0.0f, 1.0f, 0.0f);
+    glBegin(GL_QUADS);
+    	glTexCoord2f(0.0f, 1.0f); glVertex2i(0,0);
+    	glTexCoord2f(0.0f, 0.0f); glVertex2i(0,yres);
+    	glTexCoord2f(1.0f, 0.0f); glVertex2i(xres,yres);
+    	glTexCoord2f(1.0f, 1.0f); glVertex2i(xres,0);
+    glEnd();
+	glDisable(GL_ALPHA_TEST);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glPopMatrix();
+	//*/
+	ang += 4.0;
+}
+
+
 //Sets up and binds the background texture
 void andrewBackImg(GLuint texture, int xres, int yres, float xc[], float yc[])
 {
@@ -106,6 +149,27 @@ void andrewDrawShip(GLuint texture, float* pos)
 {
 	glColor3f(1.0, 1.0, 0.0);
 	int width=40;
+    glPushMatrix();
+    glTranslatef(pos[0], pos[1], pos[2]);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glEnable(GL_ALPHA_TEST);
+    glAlphaFunc(GL_GREATER, 0.0f);
+    glColor4ub(255,255,255,255);
+    glBegin(GL_QUADS);
+    	glTexCoord2f(0.0f, 1.0f); glVertex2i(-width,-width);
+    	glTexCoord2f(0.0f, 0.0f); glVertex2i(-width, width);
+    	glTexCoord2f(1.0f, 0.0f); glVertex2i( width, width);
+    	glTexCoord2f(1.0f, 1.0f); glVertex2i( width,-width);
+    glEnd();
+	glDisable(GL_ALPHA_TEST);
+	glBindTexture(GL_TEXTURE_2D, 0);
+    glPopMatrix();
+}
+
+void andrewDrawEnemy(GLuint texture, float* pos)
+{
+	glColor3f(1.0, 1.0, 0.0);
+	int width=30;
     glPushMatrix();
     glTranslatef(pos[0], pos[1], pos[2]);
     glBindTexture(GL_TEXTURE_2D, texture);
