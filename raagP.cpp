@@ -15,8 +15,7 @@
 #include <fcntl.h>
 
 
-void raag_text(int yres, int xres)
-{
+void raag_text(int yres, int xres){
     Rect r;
     r.bot = yres-65;
     r.left = xres/2;
