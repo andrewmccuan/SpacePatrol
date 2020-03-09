@@ -53,5 +53,3 @@ void set_to_non_blocking(const int sock){
         exit(EXIT_FAILURE);
     }
 }
-
-
