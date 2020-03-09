@@ -78,51 +78,51 @@ extern void timeCopy(struct timespec *dest, struct timespec *source);
 
 Image:: ~Image() { delete [] data; }
 Image::Image(const char *fname) {
-    if (fname[0] == '\0')
-        return;
-    //printf("fname **%s**\n", fname);
-    int ppmFlag = 0;
-    char name[40];
-    strcpy(name, fname);
-    int slen = strlen(name);
-    char ppmname[80];
-    if (strncmp(name+(slen-4), ".ppm", 4) == 0)
-        ppmFlag = 1;
-    if (ppmFlag) {
-        strcpy(ppmname, name);
-    } else {
-        name[slen-4] = '\0';
-        //printf("name **%s**\n", name);
-        sprintf(ppmname,"%s.ppm", name);
-        //printf("ppmname **%s**\n", ppmname);
-        char ts[100];
-        //system("convert eball.jpg eball.ppm");
-        sprintf(ts, "convert %s %s", fname, ppmname);
-        system(ts);
-    }
-    //sprintf(ts, "%s", name);
-    FILE *fpi = fopen(ppmname, "r");
-    if (fpi) {
-        char line[200];
-        fgets(line, 200, fpi);
-        fgets(line, 200, fpi);
-        //skip comments and blank lines
-        while (line[0] == '#' || strlen(line) < 2)
-            fgets(line, 200, fpi);
-        sscanf(line, "%i %i", &width, &height);
-        fgets(line, 200, fpi);
-        //get pixel data
-        int n = width * height * 3;
-        data = new unsigned char[n];
-        for (int i=0; i<n; i++)
-            data[i] = fgetc(fpi);
-        fclose(fpi);
-    } else {
-        printf("ERROR opening image: %s\n",ppmname);
-        exit(0);
-    }
-    if (!ppmFlag)
-        unlink(ppmname);
+	if (fname[0] == '\0')
+		return;
+	//printf("fname **%s**\n", fname);
+	int ppmFlag = 0;
+	char name[40];
+	strcpy(name, fname);
+	int slen = strlen(name);
+	char ppmname[80];
+	if (strncmp(name+(slen-4), ".ppm", 4) == 0)
+		ppmFlag = 1;
+	if (ppmFlag) {
+		strcpy(ppmname, name);
+	} else {
+		name[slen-4] = '\0';
+		//printf("name **%s**\n", name);
+		sprintf(ppmname,"%s.ppm", name);
+		//printf("ppmname **%s**\n", ppmname);
+		char ts[100];
+		//system("convert eball.jpg eball.ppm");
+		sprintf(ts, "convert %s %s", fname, ppmname);
+		system(ts);
+	}
+	//sprintf(ts, "%s", name);
+	FILE *fpi = fopen(ppmname, "r");
+	if (fpi) {
+		char line[200];
+		fgets(line, 200, fpi);
+		fgets(line, 200, fpi);
+		//skip comments and blank lines
+		while (line[0] == '#' || strlen(line) < 2)
+			fgets(line, 200, fpi);
+		sscanf(line, "%i %i", &width, &height);
+		fgets(line, 200, fpi);
+		//get pixel data
+		int n = width * height * 3;
+		data = new unsigned char[n];
+		for (int i=0; i<n; i++)
+			data[i] = fgetc(fpi);
+		fclose(fpi);
+	} else {
+		printf("ERROR opening image: %s\n",ppmname);
+		exit(0);
+	}
+	if (!ppmFlag)
+		unlink(ppmname);
 }
 Image doneyImg = "./images/doneyImage.png";
 Image img[5] = { 
@@ -159,6 +159,7 @@ public:
 	int save_score;
 	int help = 0;
 	int xres, yres;
+	int *arr;
 	char keys[65536];
 	GLuint shipTexture;
 	GLuint enemy1Texture;
@@ -170,6 +171,7 @@ public:
 		xres = 1250;
 		yres = 900;
 		memset(keys, 0, 65536);
+		arr = 0;
 	}
 } gl;
 
@@ -444,7 +446,7 @@ void andrewDrawShip(GLuint texture, float* pos);
 void andrewDrawEnemy(GLuint texture, float* pos);
 void andrewBackImgMove(float* xc);
 void andrewHelpMenu(int, int, int);
-void andrewHighscoreBox(int, int, int);
+void andrewHighscoreBox(int, int, int, int);
 void andrewShowMenu(GLuint texture1, GLuint texture2, int xres, int yres);
 //void genAndBindDoneyImage();
 void renderDoneyImage(GLuint, int, int);
@@ -462,7 +464,7 @@ void det_coll(int yres, int xres);
 extern void set_to_non_blocking(const int sock);
 extern void show_cert_data(SSL *ssl, BIO *outbio, const char *hostname);
 extern BIO *ssl_setup_bio(void);
-int high_score(int score);
+int * high_score(int score);
 //==========================================================================
 // M A I N
 //==========================================================================
@@ -567,18 +569,18 @@ void init_opengl(void)
 	glGenTextures(1, &gl.menuTexture);
 	glGenTextures(1, &gl.menuGalTexture);
 
-    // Render Doney's Image
-    //------------------------------------------------------------------
-    //Code borrowed from Gordon Greisel.
+	// Render Doney's Image
+	//------------------------------------------------------------------
+	//Code borrowed from Gordon Greisel.
 	int w = doneyImg.width;
-    int h = doneyImg.height;
-    
-    glBindTexture(GL_TEXTURE_2D, gl.creditTexture);
-    
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
-        GL_RGB, GL_UNSIGNED_BYTE, doneyImg.data);
+	int h = doneyImg.height;
+
+	glBindTexture(GL_TEXTURE_2D, gl.creditTexture);
+
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
+			GL_RGB, GL_UNSIGNED_BYTE, doneyImg.data);
     //------------------------------------------------------------------
 	// Background Image
 	//--- From "background" framework ---
@@ -836,6 +838,7 @@ void deleteAsteroid(Game *g, Asteroid *node)
 			node->next->prev = NULL;
 			g->ahead = node->next;
 		}
+
 	} else {
 		if (node->next == NULL) {
 			//at end of list.
@@ -1219,7 +1222,8 @@ void enemy_bullets()
 }
 
 void render()
-{
+{	
+
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	//------------------------------------------------------------------------
@@ -1267,12 +1271,18 @@ void render()
 		raag_text(gl.yres, gl.xres);
 	}
 	if (gl.highscore == 1) {
-		andrewHighscoreBox(gl.yres, gl.xres, g.score);
+		if (!gl.arr) {
+			andrewHighscoreBox(gl.yres, gl.xres, g.score, 0);
+		} else {
+			andrewHighscoreBox(gl.yres, gl.xres, g.score, *(gl.arr));
+		}
 	}
 
 	if (gl.save_score == 1) {
-		high_score(g.score);
+		gl.arr = high_score(g.score);
 		gl.save_score = gl.save_score ^ 1;
+		std::cout << *(gl.arr) << std::endl;
+		//andrewHighscoreBox(gl.yres, gl.xres, g.score, *(arr));
 	}
 
 	if (gl.collision_det == 1) {
