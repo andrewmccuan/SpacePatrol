@@ -198,7 +198,7 @@ public:
 	}
 };
 
-void new_ship(Ship *my_enemy, int a);
+void new_ship(Ship *my_enemy, int a, int resy, int resx);
 
 class Bullet {
 public:
@@ -291,7 +291,7 @@ public:
 		clock_gettime(CLOCK_REALTIME, &bulletTimer);
 		nenemies = 0;
 		for (int k = 0; k < MAX_ENEMIES; k++) {
-			new_ship(&enemies[k], k);
+			new_ship(&enemies[k], k, gl.yres, gl.xres);
 			nenemies++;
 			std::cout << "Ship position x: " << enemies[k].pos[0] << std::endl;
 			std::cout << "Ship position Y: " << enemies[k].pos[1] << std::endl;
@@ -892,7 +892,7 @@ void physics()
 	g.ship.pos[1] += g.ship.vel[1];
 	
 	for (int k = g.nenemies; k < MAX_ENEMIES; k++) {
-		new_ship(&g.enemies[k], k);
+		new_ship(&g.enemies[k], k, gl.yres, gl.xres);
 		g.nenemies++;
 		std::cout << "Ship position x: " << g.enemies[k].pos[0] << std::endl;
 		std::cout << "Ship position y: " << g.enemies[k].pos[1] << std::endl;
@@ -1075,40 +1075,7 @@ void physics()
 	} else {
 		gl.collision_det = 0;
 	}
-
-
-	if (gl.keys[XK_Left]) {
-		g.ship.vel[0] = movement(0);
-	}
-
-	if (!gl.keys[XK_Left]) {
-		g.ship.vel[0] = 0;
-	}
-
-	if (gl.keys[XK_Right]) {
-		g.ship.vel[0] = movement(1);    
-	}
 	
-	if (!gl.keys[XK_Up]) {
-		g.ship.vel[1] = 0;
-	}
-
-	if (gl.keys[XK_Up]) {
-		g.ship.vel[1] = 2;
-	}
-
-	if (gl.keys[XK_Down]) {
-		g.ship.vel[1] = movement(0);
-	}
-
-	if (gl.keys[XK_Down] && gl.keys[XK_Up]) {
-		g.ship.vel[1] = 0;
-	}
-
-	if (gl.keys[XK_Left] && gl.keys[XK_Right]) {
-		g.ship.vel[0] = 0;
-	}
-
 	if (gl.keys[XK_space]) {
 		//a little time between each bullet
 		struct timespec bt;
@@ -1142,6 +1109,40 @@ void physics()
 			}
 		}
 	}
+
+
+	if (gl.keys[XK_Left]) {
+		g.ship.vel[0] = movement(0);
+	}
+
+	if (!gl.keys[XK_Left] && !gl.keys[XK_Right]) {
+		g.ship.vel[0] = 0;
+	}
+
+	if (gl.keys[XK_Right]) {
+		g.ship.vel[0] = movement(1);    
+	}
+	
+	if (!gl.keys[XK_Up] && !gl.keys[XK_Down]) {
+		g.ship.vel[1] = 0;
+	}
+
+	if (gl.keys[XK_Up]) {
+		g.ship.vel[1] = movement(1);
+	}
+
+	if (gl.keys[XK_Down]) {
+		g.ship.vel[1] = movement(0);
+	}
+
+	if (gl.keys[XK_Down] && gl.keys[XK_Up]) {
+		g.ship.vel[1] = 0;
+	}
+
+	if (gl.keys[XK_Left] && gl.keys[XK_Right]) {
+		g.ship.vel[0] = 0;
+	}
+
 	if (g.mouseThrustOn) {
 		//should thrust be turned off
 		struct timespec mtt;

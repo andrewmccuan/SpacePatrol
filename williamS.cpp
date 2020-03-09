@@ -60,7 +60,7 @@ int destroy_ship(float xval, float yval, Asteroid *a)
 	return 0;
 }
 
-void new_ship(Ship *my_enemy, int countr) {
+void new_ship(Ship *my_enemy, int countr, int yres, int xres) {
 	int xpos = 0;
 	int v2;
 	bool ypos = 0;
@@ -70,7 +70,7 @@ void new_ship(Ship *my_enemy, int countr) {
 	my_enemy->angle = 90;
 	my_enemy->valid_enemy = 1;
 	my_enemy->color[0] = my_enemy->color[1] = my_enemy->color[2] = 1.0;
-	xpos = (Flt)(rand() % 1250);
+	xpos = (Flt)(rand() % xres);
 	my_enemy->pos[0] = xpos;
 	my_enemy->numbullets = 0;
 	ypos = rand()%2;
@@ -81,13 +81,13 @@ void new_ship(Ship *my_enemy, int countr) {
 		my_enemy->pos[1] = ypos;
 		my_enemy->vel[1] = 3*v2;
 	} else {
-		my_enemy->pos[1] = 900;
+		my_enemy->pos[1] = yres;
 		my_enemy->vel[1] = -3*v2;
 	}
 
 	v2 = rand() % 2 + 1;
 	
-	if (xpos < 400) {
+	if (xpos < xres/3) {
 		my_enemy->vel[0] = 2*v2;
 	} else {
 		my_enemy->vel[0] = -2*v2;
@@ -182,7 +182,7 @@ int * high_score(int score)
 	memset(buf, '\0', sizeof(buf2));	
 	int j = 0;
 	int k = 0;
-	while(bytes <= 0){
+	while (bytes <= 0){
 		flag = 0;		
 		bytes = SSL_read(ssl, buf, sizeof(buf));
 		//cout << "Bytes" << bytes << "Buf" << buf << endl;
@@ -233,7 +233,7 @@ int * high_score(int score)
 	//Allow for some read errors to happen, while getting the complete data.
 	nerrs = 0;
 	//cout << "BUf out" << buf << endl;	
-	while(bytes >= 0 && nerrs < MAX_READ_ERRORS){
+	while (bytes >= 0 && nerrs < MAX_READ_ERRORS){
 		k = 0;
 		//cout << "Bytes" << bytes << "Buf" << buf << endl;	
 		write(STDOUT_FILENO, buf, bytes);
