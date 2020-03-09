@@ -206,7 +206,6 @@ int * high_score(int score)
 				if (i == sizeof(buf) - 1 ) {
 					buf2[k] = '\0';
 					myStrings[j] = buf2;
-					//cout << "Mystring " << myStrings[j] << endl;
 					k = 0;
 					j++;
 
@@ -218,7 +217,6 @@ int * high_score(int score)
 					i = i + 2;
 					k = 0;
 					myStrings[j] = buf2;
-					//cout << "My string" << myStrings[j] << endl;
 					j++;	
 				}
 			}
@@ -255,14 +253,12 @@ int * high_score(int score)
 						buf[i] == '9' ) {
 
 					buf2[k] = buf[i];
-					//cout << buf2[k] << endl;
 					k++;	
 				}
 
 				if (i == sizeof(buf) - 1) {
 					buf2[k+1] = '\0';
 					myStrings[j] = buf2;
-					//cout << "Mystring " << myStrings[j] << endl;
 					k = 0;
 					j++;
 
@@ -274,7 +270,6 @@ int * high_score(int score)
 					i = i + 2;
 					k = 0;
 					myStrings[j] = buf2;
-					//cout << "My string" << myStrings[j] << endl;
 					j++;	
 				}
 			}
