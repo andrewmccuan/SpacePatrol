@@ -6,14 +6,11 @@
 #include <GL/glx.h>
 #include "fonts.h"
 #include "image.h"
-
-
 #include <openssl/crypto.h>
 #include <openssl/x509.h>
 #include <openssl/pem.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
-
 
 
 // Friday changed text color
@@ -62,5 +59,4 @@ BIO *ssl_setup_bio(void)
     bio = BIO_new_fp(stdout, BIO_NOCLOSE);
     return bio;
 }
-
 
