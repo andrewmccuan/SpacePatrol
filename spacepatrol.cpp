@@ -124,20 +124,14 @@ Image::Image(const char *fname) {
 	if (!ppmFlag)
 		unlink(ppmname);
 }
-Image doneyImg = "./images/doneyImage.png";
+Image doneyImg = "./images/doneyImage.jpg";
 Image img[5] = { 
-"./images/sp_background_seamless.png",
-"./images/sp_ship512.png",
-"./images/sp_enemy1.png",
-"./images/sp_menu.png",
-"./images/sp_menuGalaxy.png"
+"./images/sp_background_seamless.jpg",
+"./images/sp_ship.jpg",
+"./images/sp_enemy1.jpg",
+"./images/sp_menu.jpg",
+"./images/sp_menuGalaxy2.jpg"
 };
-//Image img [4]= {
-//"./images/pic.png",
-//"./images/pic.png",
-//"./images/pic.png",
-//"./images/pic.png"
-//};
 
 //--- From "background" framework ---
 class Texture {
@@ -626,7 +620,6 @@ void init_opengl(void)
 	free(silhouetteData);
 	//------------------------------------------------------------------
 	// Menu Image
-	// --- From "rainforest" framework ---
 	//*
 	int w3 = img[3].width;
 	int h3 = img[3].height;
@@ -635,9 +628,14 @@ void init_opengl(void)
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, 3, w3, h3, 0,
         GL_RGB, GL_UNSIGNED_BYTE, img[3].data);
+
+	glBindTexture(GL_TEXTURE_2D, gl.creditTexture);
+
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
+			GL_RGB, GL_UNSIGNED_BYTE, doneyImg.data);
 	//
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w3, h3, 0,
-							GL_RGBA, GL_UNSIGNED_BYTE, img[3].data);
 	//*/
 	//------------------------------------------------------------------
 	// Spinning Galaxy Image

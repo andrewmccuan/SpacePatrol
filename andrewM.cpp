@@ -5,6 +5,7 @@
 #include <GL/glx.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <math.h>
 #include "fonts.h"
 #include "image.h"
 
@@ -78,20 +79,58 @@ void show_cert_data(SSL *ssl, BIO *outbio, const char *hostname)
 	printf("--------------------------------------------------------------\n");
 }
 
+//From my lab12.cpp in 3480 folder
+void rotate_square(int sqr[4][2], int sqr2[4][2], float ang)
+{
+	//Find the centroid of the square
+	int centroid[2];
+	centroid[0] = (sqr[0][0] + sqr[1][0] + sqr[2][0] + sqr[3][0]) / 4;
+	centroid[1] = (sqr[0][1] + sqr[1][1] + sqr[2][1] + sqr[3][1]) / 4;
+	int xdiff = 0 - centroid[0];
+	int ydiff = 0 - centroid[1];
+	for (int i = 0; i < 4; i++) {
+		sqr[i][0] += xdiff;
+		sqr[i][1] += ydiff;
+	}
+	//Rotation Matrix
+	double matrix[2][2];
+	matrix[0][0] = cos(ang);
+	matrix[0][1] = -sin(ang);
+	matrix[1][0] = sin(ang);
+	matrix[1][1] = cos(ang);
+	for (int i = 0; i < 4; i++) {
+		sqr2[i][0] = sqr[i][0] * matrix[0][0] + sqr[i][1] * matrix[1][0];
+		sqr2[i][1] = sqr[i][0] * matrix[0][1] + sqr[i][1] * matrix[1][1];
+	}
+}
+
 void andrewShowMenu(GLuint texture1, GLuint texture2, int xres, int yres)
 {
 	static float ang = 0.0;
+	static int sqr[4][2];
+	int sqr2[4][2];
+	static int firsttime = 1;
+	if (firsttime == 1) {
+		sqr[0][0] = 0;
+		sqr[0][1] = 0;
+		sqr[1][0] = 0;
+		sqr[1][1] = 400; //yres;
+		sqr[2][0] = 400; //xres;
+		sqr[2][1] = 400; //yres;
+		sqr[3][0] = 400; //xres;
+		sqr[3][1] = 0;
+		firsttime = 0;
+	}
 	//Back Image
 	//*
-	
 	glColor3f(1.0, 1.0, 1.0);
 	glPushMatrix();
 	glBindTexture(GL_TEXTURE_2D, texture1);
     glBegin(GL_QUADS);
-    	glTexCoord2f(0.0f, 1.0f); glVertex2i(0,0);
-    	glTexCoord2f(0.0f, 0.0f); glVertex2i(0,yres);
-    	glTexCoord2f(1.0f, 0.0f); glVertex2i(xres,yres);
-		glTexCoord2f(1.0f, 1.0f); glVertex2i(xres,0);
+    	glTexCoord2f(0.0f, 1.0f); glVertex2i(0, 0);
+    	glTexCoord2f(0.0f, 0.0f); glVertex2i(0, yres);
+    	glTexCoord2f(1.0f, 0.0f); glVertex2i(xres, yres);
+		glTexCoord2f(1.0f, 1.0f); glVertex2i(xres, 0);
     glEnd();
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glPopMatrix();
@@ -101,23 +140,22 @@ void andrewShowMenu(GLuint texture1, GLuint texture2, int xres, int yres)
 	//*
 	glColor3f(1.0, 1.0, 1.0);
 	glPushMatrix();
-	//glLoadIdentity();
-	glTranslatef(0.0f,.0f,0.0f);
+	glTranslatef(float(xres/2), float(yres/2),0.0f);
 	glBindTexture(GL_TEXTURE_2D, texture2);
 	glEnable(GL_ALPHA_TEST);
 	glAlphaFunc(GL_GREATER, 0.0f);
-	glRotatef(ang, 0.0f, 1.0f, 0.0f);
+	rotate_square(sqr, sqr2, ang);
 	glBegin(GL_QUADS);
-		glTexCoord2f(0.0f, 1.0f); glVertex2i(0,0);
-		glTexCoord2f(0.0f, 0.0f); glVertex2i(0,yres);
-		glTexCoord2f(1.0f, 0.0f); glVertex2i(xres,yres);
-		glTexCoord2f(1.0f, 1.0f); glVertex2i(xres,0);
+		glTexCoord2f(0.0f, 1.0f); glVertex2i(sqr2[0][0], sqr2[0][1]);
+		glTexCoord2f(0.0f, 0.0f); glVertex2i(sqr2[1][0], sqr2[1][1]);
+		glTexCoord2f(1.0f, 0.0f); glVertex2i(sqr2[2][0], sqr2[2][1]);
+		glTexCoord2f(1.0f, 1.0f); glVertex2i(sqr2[3][0], sqr2[3][1]);
 	glEnd();
 	glDisable(GL_ALPHA_TEST);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glPopMatrix();
 	//*/
-	ang += 4.0;
+	ang += 0.02;
 }
 
 
@@ -269,5 +307,4 @@ void andrewHighscoreBox(int yres, int xres, int score, int high_score)
 	r.left = r.left - 5;
 	ggprint8b(&r, 16, 0x00ffff00, "Your Score - %d", score);
 	ggprint8b(&r, 16, 0x00ffff00, "Best Score - %d", high_score);
-
 }
