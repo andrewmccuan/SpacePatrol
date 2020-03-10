@@ -277,18 +277,18 @@ void andrewHelpMenu(int yres, int xres, int bot)
 	
 }
 
-void andrewHighscoreBox(int yres, int xres, int score, int high_score)
+void andrewHighscoreBox(int yres, int xres, int score, int* high_score)
 {
-	int x1 = 75;
+	int x1 = 100;
 	//int x2 = 200;
 	int y1 = 25;
-	int y2 = 125;
+	int y2 = 195;
 	glColor3f(1.0, 1.0, 0.0);
 	glBegin(GL_QUADS);
 		glVertex2f(((xres / 2) + x1), (yres - y1));
 		glVertex2f(((xres / 2) - x1), (yres - y1));
-		glVertex2f(((xres / 2) - x1), (yres - (y1 + 16)));
-		glVertex2f(((xres / 2) + x1), (yres - (y1 + 16)));
+		glVertex2f(((xres / 2) - x1), (yres - (y1 + 22)));
+		glVertex2f(((xres / 2) + x1), (yres - (y1 + 22)));
 	glEnd();
 	glColor3f(1.0, 1.0, 1.0);
 	glBegin(GL_LINE_LOOP);
@@ -298,13 +298,27 @@ void andrewHighscoreBox(int yres, int xres, int score, int high_score)
 		glVertex2f(((xres / 2)+ x1), (yres - y2));
 	glEnd();
 
+	glColor3f(0.3, 0.3, 0.3);
+	int j = 24;
+	for (int i = 1; i < 6; i++) {
+	glBegin(GL_LINES);
+    	glVertex2f(((xres / 2) + x1), (yres - (y1 + (23 + (i*j)))));
+    	glVertex2f(((xres / 2) - x1), (yres - (y1 + (23 + (i*j)))));
+	glEnd();
+	}
+
 	Rect r;
-	r.bot = yres - (y1 + 15);
+	r.bot = yres - (y1 + 20);
 	//r.left = 10;
-	r.left = xres/2 - 40;
+	r.left = xres/2 - 65;
 	r.center = 0;
-	ggprint8b(&r, 16, 0x00000000, "Scoreboard [TAB]");
-	r.left = r.left - 5;
-	ggprint8b(&r, 16, 0x00ffff00, "Your Score - %d", score);
-	ggprint8b(&r, 16, 0x00ffff00, "Best Score - %d", high_score);
+	ggprint13(&r, 25, 0x00000000, "Scoreboard [TAB]");
+	r.left = r.left - 20;
+	ggprint13(&r, 24, 0x00ffaa00, "Your Score - %7d", score);
+	//ggprint13(&r, 22, 0x00ffff00, "Your Score - %05d", score);
+	ggprint13(&r, 24, 0x00ffd500, "1ST - %012d", high_score[0]);
+	ggprint13(&r, 24, 0x00ffd500, "2ND - %012d", high_score[1]);
+	ggprint13(&r, 24, 0x00ffd500, "3RD - %012d", high_score[2]);
+	ggprint13(&r, 24, 0x00ffd500, "4TH - %012d", high_score[3]);
+	ggprint13(&r, 24, 0x00ffd500, "5TH - %012d", high_score[4]);
 }

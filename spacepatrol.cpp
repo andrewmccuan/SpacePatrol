@@ -438,7 +438,7 @@ void andrewDrawShip(GLuint texture, float* pos);
 void andrewDrawEnemy(GLuint texture, float* pos);
 void andrewBackImgMove(float* xc);
 void andrewHelpMenu(int, int, int);
-void andrewHighscoreBox(int, int, int, int);
+void andrewHighscoreBox(int, int, int, int* arr);
 void andrewShowMenu(GLuint texture1, GLuint texture2, int xres, int yres);
 //void genAndBindDoneyImage();
 void renderDoneyImage(GLuint, int, int);
@@ -1269,9 +1269,10 @@ void render()
 	}
 	if (gl.highscore == 1) {
 		if (!gl.arr) {
-			andrewHighscoreBox(gl.yres, gl.xres, g.score, 0);
+			int arrTest[] = {1, 2, 3, 4, 5};
+			andrewHighscoreBox(gl.yres, gl.xres, g.score, arrTest);
 		} else {
-			andrewHighscoreBox(gl.yres, gl.xres, g.score, *(gl.arr));
+			andrewHighscoreBox(gl.yres, gl.xres, g.score, gl.arr);
 		}
 	}
 
