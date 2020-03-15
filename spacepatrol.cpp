@@ -59,7 +59,7 @@ const float gravity = -0.2f;
 #define ALPHA 1
 const int MAX_BULLETS = 11;
 const Flt MINIMUM_ASTEROID_SIZE = 60.0;
-const int MAX_ENEMIES = 2;
+const int MAX_ENEMIES = 1;
 
 //-----------------------------------------------------------------------------
 //Setup timers
@@ -172,10 +172,14 @@ public:
 	Vec dir;
 	Vec pos;
 	Vec vel;
+	Vec save_vel;
+	int quadrant[2];
 	float angle;
 	float color[3];
 	bool valid_enemy;
 	int numbullets;
+	int rotated;
+	int first_call;
 public:
 	Ship() {
 		VecZero(dir);
@@ -187,6 +191,10 @@ public:
 		angle = 270.0;
 		color[0] = color[1] = color[2] = 1.0;
 		valid_enemy = 0;
+		quadrant[0] = 0;
+		first_call = 0;
+		quadrant[1] = 0;
+		rotated = 0;
 	}
 };
 
@@ -429,6 +437,7 @@ public:
 
 //function prototypes
 void renderTGIF (int, int);
+int circ_mov (Ship *my_enemy);
 void raag_text(int, int);
 void renderDoneyTextCredits(int, int);
 void draw_will_text(int, int);
@@ -495,6 +504,7 @@ int main()
 
 //===============================================
 // Imported from (rainforest framework)
+// 
 //===============================================
 unsigned char *buildAlphaData(Image *img)
 {
@@ -622,10 +632,10 @@ void init_opengl(void)
 	int w3 = img[3].width;
 	int h3 = img[3].height;
 	glBindTexture(GL_TEXTURE_2D, gl.menuTexture);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, w3, h3, 0,
-        GL_RGB, GL_UNSIGNED_BYTE, img[3].data);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, w3, h3, 0,
+	GL_RGB, GL_UNSIGNED_BYTE, img[3].data);
 
 	glBindTexture(GL_TEXTURE_2D, gl.creditTexture);
 
@@ -879,8 +889,6 @@ void physics()
 {
 	//Moves the background
 	andrewBackImgMove(gl.tex.xc);
-
-
 
 	Flt d0,d1,dist;
 	//Update ship position
@@ -1148,9 +1156,20 @@ void physics()
 		if (tdif < -0.3)
 			g.mouseThrustOn = false;
 	}
+
 	for (int k = 0; k < MAX_ENEMIES; k++) {
 		g.enemies[k].pos[0] += g.enemies[k].vel[0];
 		g.enemies[k].pos[1] += g.enemies[k].vel[1];
+		//std::cout << "Y pos: " << g.enemies[k].pos[1] << std::endl;	
+		if (g.enemies[k].pos[1] > gl.yres / 3 && g.enemies[k].pos[1] < (gl.yres - gl.yres/3)) {
+			//std::cout << "Now rotated: " << g.enemies[k].pos[1] << std::endl;
+			g.enemies[k].rotated = 1;
+		}
+		if (g.enemies[k].rotated == 1) {
+			g.enemies[k].first_call += 1;
+
+			circ_mov(&g.enemies[k]);
+		}
 
 		if (g.enemies[k].pos[0] < 0.0) {
 			g.enemies[k].valid_enemy = 0;

@@ -74,6 +74,7 @@ void new_ship(Ship *my_enemy, int countr, int yres, int xres) {
 	my_enemy->pos[0] = xpos;
 	my_enemy->numbullets = 0;
 	ypos = rand()%2;
+	my_enemy->first_call = 0;
 	
 	v2 = rand() % 2 + 1;
 
@@ -95,8 +96,6 @@ void new_ship(Ship *my_enemy, int countr, int yres, int xres) {
 
 	my_enemy->pos[2] = 0.0f;
 }
-
-
 
 int * high_score(int score)
 {
@@ -297,7 +296,132 @@ int * high_score(int score)
 	SSL_free(ssl);
 	close(sd);
 	SSL_CTX_free(ctx);
-
 	return ret_arr;
 }
 
+int circ_mov (Ship *my_enemy)
+{
+	int dir_flag = 0;
+	if (my_enemy->first_call == 1) {
+		my_enemy->save_vel[0] = 3;
+		my_enemy->save_vel[1] = 3;
+		my_enemy->vel[0] = 3;
+		my_enemy->vel[1] = 0;
+		my_enemy->quadrant[0] = 4;
+	}
+	if ((my_enemy->quadrant[0] == my_enemy->quadrant[1]) && (my_enemy->first_call > 126)) {
+		my_enemy->rotated = 0;
+		return 1;
+	}
+	if (1) {
+		//std::cout << "In if" << std::endl;
+		if (my_enemy->vel[0] >= 0 && my_enemy->vel[1] > 0) {
+			//std::cout << "In 4th" << std::endl;
+			//std::cout << "" << std::endl;
+
+			if (my_enemy->first_call == 1) {
+				my_enemy->quadrant[0] = 4;
+			}
+
+
+
+			if ((float)my_enemy->vel[0] < 0 ) {
+				my_enemy->vel[1] = my_enemy->save_vel[1];
+				my_enemy->vel[0] = 0;
+				
+				std::cout << "Changing velocity" << std::endl;
+				//my_enemy->quadrant[1] = 1;
+			} else {
+
+				dir_flag = 1;
+				my_enemy->quadrant[1] = 4;
+			}
+		}
+		
+		if ((float)my_enemy->vel[0] > 0 && (float)my_enemy->vel[1] <= 0) {
+			//std::cout << "In 3rd" << std::endl;
+			if (my_enemy->vel[1] > -0.1 && my_enemy->vel[1] < 0.1) {
+				my_enemy->vel[1] = 0;
+				my_enemy->vel[0] = my_enemy->save_vel[0];
+				my_enemy->quadrant[1] = 4;
+			} else {
+				
+				dir_flag = 2;
+				my_enemy->quadrant[1] = 3;
+			}
+		}
+
+		if ((float)my_enemy->vel[0] < 0 && (float)my_enemy->vel[1] >= 0) {
+			//std::cout << "In 1st" << std::endl;
+			if (my_enemy->vel[1] <= 0) {
+				my_enemy->vel[1] = -1 * my_enemy->save_vel[1];
+				my_enemy->vel[0] = 0;
+				my_enemy->quadrant[1] = 2;
+			} else {
+				dir_flag = 3;
+				my_enemy->quadrant[1] = 1;
+			}
+		}
+
+		if ((float)my_enemy->vel[0] < 0 && (float)my_enemy->vel[1] <= 0) {
+			//std::cout << "In 2nd" << std::endl;
+			if (my_enemy->vel[0] > -0.1 && my_enemy->vel[0] < 0.1) {
+				my_enemy->vel[0] = 0;
+				my_enemy->vel[1] = -1 * my_enemy->save_vel[1];
+				my_enemy->quadrant[1] = 3;
+			} else {
+				dir_flag = 4;
+				my_enemy->quadrant[1] = 2;
+			}
+		}
+
+		if (my_enemy->quadrant[1] == 4) {
+			
+			if (my_enemy->vel[0] > 0) {
+				my_enemy->vel[0] -= .1;
+			}
+			if (my_enemy->vel[1] < my_enemy->save_vel[1]) {
+				my_enemy->vel[1] += .1;
+			}
+		}
+
+		if (my_enemy->quadrant[1] == 3) {
+			
+			if (my_enemy->vel[1] < 0) {
+				my_enemy->vel[1] += .1;
+			}
+
+			if (my_enemy->vel[0] < my_enemy->save_vel[0]) {
+				my_enemy->vel[0] += .1;
+			}
+
+		}
+
+		if (my_enemy->quadrant[1] == 2) {
+			
+			if (my_enemy->vel[0] < 0) {
+				my_enemy->vel[0] += .1;
+			}
+			if (my_enemy->vel[1] > -1 * my_enemy->save_vel[1]) {
+				my_enemy->vel[1] -= .1;
+			}
+
+		}
+
+		if (my_enemy->quadrant[1] == 1) {
+			
+			if (my_enemy->vel[1] > 0) {
+				my_enemy->vel[1] -= .1;
+			}
+			if (my_enemy->vel[0] > -1 * my_enemy->save_vel[0]) {
+				my_enemy->vel[0] -= .1;
+			}		
+		}
+
+		return dir_flag;
+
+	} else {
+		return 0;
+	}
+	
+}
