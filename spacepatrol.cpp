@@ -180,6 +180,7 @@ public:
 	int numbullets;
 	int rotated;
 	int first_call;
+	int num_calls_vel;
 public:
 	Ship() {
 		VecZero(dir);
@@ -195,6 +196,7 @@ public:
 		first_call = 0;
 		quadrant[1] = 0;
 		rotated = 0;
+		num_calls_vel = 1;
 	}
 };
 
@@ -242,6 +244,7 @@ public:
 	int nbullets;
 	int ebullets;
 	int nenemies;
+	int num_calls_vel;
 	struct timespec bulletTimer;
 	struct timespec ebulletTimer;
 	struct timespec mouseThrustTimer;
@@ -257,6 +260,7 @@ public:
 		ebullets = 0;
 		nships = 0;
 		mouseThrustOn = false;
+		num_calls_vel = 0;
 		//build 10 asteroids...
 		for (int j=0; j<10; j++) {
 			Asteroid *a = new Asteroid;
@@ -462,6 +466,7 @@ void render();
 int movement(int);
 int destroy_ship(float, float, Asteroid *);
 void det_coll(int yres, int xres);
+void change_vel(Ship *, int, int);
 extern void set_to_non_blocking(const int sock);
 extern void show_cert_data(SSL *ssl, BIO *outbio, const char *hostname);
 extern BIO *ssl_setup_bio(void);
@@ -1157,32 +1162,40 @@ void physics()
 			g.mouseThrustOn = false;
 	}
 
+	int quadrant = 0;
+
 	for (int k = 0; k < MAX_ENEMIES; k++) {
 		g.enemies[k].pos[0] += g.enemies[k].vel[0];
 		g.enemies[k].pos[1] += g.enemies[k].vel[1];
 		//std::cout << "Y pos: " << g.enemies[k].pos[1] << std::endl;	
-		if (g.enemies[k].pos[1] > gl.yres / 3 && g.enemies[k].pos[1] < (gl.yres - gl.yres/3)) {
+		if (g.enemies[k].pos[1] > gl.yres / 3 && g.enemies[k].pos[1] < 
+			(gl.yres - gl.yres/3)) {
 			//std::cout << "Now rotated: " << g.enemies[k].pos[1] << std::endl;
 			g.enemies[k].rotated = 1;
 		}
+
 		if (g.enemies[k].rotated == 1) {
 			g.enemies[k].first_call += 1;
-
-			circ_mov(&g.enemies[k]);
+			quadrant = circ_mov(&g.enemies[k]);
 		}
 
 		if (g.enemies[k].pos[0] < 0.0) {
+			g.enemies[k].num_calls_vel = 1;
 			g.enemies[k].valid_enemy = 0;
-			memcpy(&g.enemies[k], &g.enemies[g.nenemies-1], sizeof(Ship));	
+			memcpy(&g.enemies[k], &g.enemies[g.nenemies-1], sizeof(Ship));
 			g.nenemies--;
 		}
+		
 		else if (g.enemies[k].pos[0] > (float)gl.xres) {
+			g.enemies[k].num_calls_vel = 1;
 			g.enemies[k].valid_enemy = 0;
 			memcpy(&g.enemies[k], &g.enemies[g.nenemies-1], sizeof(Ship));	
 			g.nenemies--;
 		}
+
 		else if (g.enemies[k].pos[1] < 0) {
 			g.enemies[k].valid_enemy = 0;
+			g.enemies[k].num_calls_vel = 1;
 			memcpy(&g.enemies[k], &g.enemies[g.nenemies-1], sizeof(Ship));		
 			g.nenemies--;
 
@@ -1191,12 +1204,13 @@ void physics()
 		else if (g.enemies[k].pos[1] > ((float)gl.yres)) {
 			std::cout << g.enemies[k].pos[1] << std::endl;
 			g.enemies[k].valid_enemy = 0;
-			memcpy(&g.enemies[k], &g.enemies[g.nenemies-1], sizeof(Ship));		
-			g.nenemies--;		
+			g.enemies[k].num_calls_vel = 1;
+			memcpy(&g.enemies[k], &g.enemies[g.nenemies-1], sizeof(Ship));
+			g.nenemies--;
 		}
-		
-				
-
+		std::cout << "Quadrant " << quadrant << std::endl;
+		g.num_calls_vel += 1;
+		change_vel(&g.enemies[k], g.num_calls_vel, quadrant);
 	}
 }
 

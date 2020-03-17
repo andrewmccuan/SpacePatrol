@@ -34,6 +34,7 @@ public:
         int numbullets;	
 	int rotated;
 	int first_call;
+	int num_calls_vel;
 };
 
 class Bullet {

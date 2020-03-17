@@ -93,7 +93,6 @@ void new_ship(Ship *my_enemy, int countr, int yres, int xres) {
 	} else {
 		my_enemy->vel[0] = -2*v2;
 	}
-
 	my_enemy->pos[2] = 0.0f;
 }
 
@@ -323,8 +322,6 @@ int circ_mov (Ship *my_enemy)
 				my_enemy->quadrant[0] = 4;
 			}
 
-
-
 			if ((float)my_enemy->vel[0] < 0 ) {
 				my_enemy->vel[1] = my_enemy->save_vel[1];
 				my_enemy->vel[0] = 0;
@@ -383,6 +380,7 @@ int circ_mov (Ship *my_enemy)
 			if (my_enemy->vel[1] < my_enemy->save_vel[1]) {
 				my_enemy->vel[1] += .1;
 			}
+			return 0;
 		}
 
 		if (my_enemy->quadrant[1] == 3) {
@@ -394,6 +392,7 @@ int circ_mov (Ship *my_enemy)
 			if (my_enemy->vel[0] < my_enemy->save_vel[0]) {
 				my_enemy->vel[0] += .1;
 			}
+			return 0;
 
 		}
 
@@ -405,6 +404,7 @@ int circ_mov (Ship *my_enemy)
 			if (my_enemy->vel[1] > -1 * my_enemy->save_vel[1]) {
 				my_enemy->vel[1] -= .1;
 			}
+			return 0;
 
 		}
 
@@ -415,7 +415,8 @@ int circ_mov (Ship *my_enemy)
 			}
 			if (my_enemy->vel[0] > -1 * my_enemy->save_vel[0]) {
 				my_enemy->vel[0] -= .1;
-			}		
+			}
+			return 0;
 		}
 
 		return dir_flag;
@@ -424,4 +425,36 @@ int circ_mov (Ship *my_enemy)
 		return 0;
 	}
 	
+}
+
+void change_vel(Ship *my_enemy, int num_calls, int ship_quadrant)
+{
+	int xvel = 0;
+	int yvel = 0;
+	int pos_x = 0;
+	int pos_y = 0;
+	if (num_calls == 1) {
+		srand(time(NULL));
+	}
+	
+	pos_x = rand() % 2;
+	pos_y = rand() % 2;
+
+	if (ship_quadrant > 0 && my_enemy->num_calls_vel == 1) {
+		std::cout << "In change V" << std::endl;
+		xvel = rand() % 5;
+		yvel = rand() % 5;
+		if (pos_x == 1) {
+			my_enemy->vel[0] = xvel;
+		} else {
+			my_enemy->vel[0] = -1 * xvel;
+		}
+		
+		if (pos_y == 1) {
+			my_enemy->vel[1] = yvel;
+		} else {
+			my_enemy->vel[1] = -1 * yvel;
+		}
+		my_enemy->num_calls_vel += 1;
+	}
 }
