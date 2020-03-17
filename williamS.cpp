@@ -1,5 +1,6 @@
 // William Source File
 // Created February 2020
+// Added random enemy movement after loop
 // Some work from friday was added
 #define PORT 443
 #define USERAGENT "CMPS-3350"
