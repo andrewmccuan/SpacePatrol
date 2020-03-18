@@ -1,4 +1,8 @@
-//
+//Here is a change for march 3rd lab (From: Will)
+// andrew - change made from branch andrewB
+// 		  - 2nd change made from andrewB
+//raag - change made from branch b1
+// Doney - changed made from branch master_doney_lab7
 //program: spacepatrol.cpp
 //author:  Gordon Griesel
 //Edited by:  Andrew McCuan, Will Sparks, Doney Peters, Raag Patel
@@ -22,6 +26,16 @@
 #include "log.h"
 #include "fonts.h"
 #include "image.h"
+#include <openssl/crypto.h>
+#include <openssl/x509.h>
+#include <openssl/pem.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+#include <openssl/crypto.h>
+#include <openssl/x509.h>
+#include <openssl/pem.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 
 //defined types
 typedef float Flt;
@@ -45,7 +59,7 @@ const float gravity = -0.2f;
 #define ALPHA 1
 const int MAX_BULLETS = 11;
 const Flt MINIMUM_ASTEROID_SIZE = 60.0;
-const int MAX_ENEMIES = 2;
+const int MAX_ENEMIES = 1;
 
 //-----------------------------------------------------------------------------
 //Setup timers
@@ -62,62 +76,60 @@ extern void timeCopy(struct timespec *dest, struct timespec *source);
 
 Image:: ~Image() { delete [] data; }
 Image::Image(const char *fname) {
-    if (fname[0] == '\0')
-        return;
-    //printf("fname **%s**\n", fname);
-    int ppmFlag = 0;
-    char name[40];
-    strcpy(name, fname);
-    int slen = strlen(name);
-    char ppmname[80];
-    if (strncmp(name+(slen-4), ".ppm", 4) == 0)
-        ppmFlag = 1;
-    if (ppmFlag) {
-        strcpy(ppmname, name);
-    } else {
-        name[slen-4] = '\0';
-        //printf("name **%s**\n", name);
-        sprintf(ppmname,"%s.ppm", name);
-        //printf("ppmname **%s**\n", ppmname);
-        char ts[100];
-        //system("convert eball.jpg eball.ppm");
-        sprintf(ts, "convert %s %s", fname, ppmname);
-        system(ts);
-    }
-    //sprintf(ts, "%s", name);
-    FILE *fpi = fopen(ppmname, "r");
-    if (fpi) {
-        char line[200];
-        fgets(line, 200, fpi);
-        fgets(line, 200, fpi);
-        //skip comments and blank lines
-        while (line[0] == '#' || strlen(line) < 2)
-            fgets(line, 200, fpi);
-        sscanf(line, "%i %i", &width, &height);
-        fgets(line, 200, fpi);
-        //get pixel data
-        int n = width * height * 3;
-        data = new unsigned char[n];
-        for (int i=0; i<n; i++)
-            data[i] = fgetc(fpi);
-        fclose(fpi);
-    } else {
-        printf("ERROR opening image: %s\n",ppmname);
-        exit(0);
-    }
-    if (!ppmFlag)
-        unlink(ppmname);
+	if (fname[0] == '\0')
+		return;
+	//printf("fname **%s**\n", fname);
+	int ppmFlag = 0;
+	char name[40];
+	strcpy(name, fname);
+	int slen = strlen(name);
+	char ppmname[80];
+	if (strncmp(name+(slen-4), ".ppm", 4) == 0)
+		ppmFlag = 1;
+	if (ppmFlag) {
+		strcpy(ppmname, name);
+	} else {
+		name[slen-4] = '\0';
+		//printf("name **%s**\n", name);
+		sprintf(ppmname,"%s.ppm", name);
+		//printf("ppmname **%s**\n", ppmname);
+		char ts[100];
+		//system("convert eball.jpg eball.ppm");
+		sprintf(ts, "convert %s %s", fname, ppmname);
+		system(ts);
+	}
+	//sprintf(ts, "%s", name);
+	FILE *fpi = fopen(ppmname, "r");
+	if (fpi) {
+		char line[200];
+		fgets(line, 200, fpi);
+		fgets(line, 200, fpi);
+		//skip comments and blank lines
+		while (line[0] == '#' || strlen(line) < 2)
+			fgets(line, 200, fpi);
+		sscanf(line, "%i %i", &width, &height);
+		fgets(line, 200, fpi);
+		//get pixel data
+		int n = width * height * 3;
+		data = new unsigned char[n];
+		for (int i=0; i<n; i++)
+			data[i] = fgetc(fpi);
+		fclose(fpi);
+	} else {
+		printf("ERROR opening image: %s\n",ppmname);
+		exit(0);
+	}
+	if (!ppmFlag)
+		unlink(ppmname);
 }
-Image doneyImg = "./images/doneyImage.png";
-Image img[1] = { 
-"./images/sp_background.png"
+Image doneyImg = "./images/doneyImage.jpg";
+Image img[5] = { 
+"./images/sp_background_seamless.jpg",
+"./images/sp_ship.jpg",
+"./images/sp_enemy1.jpg",
+"./images/sp_menu.jpg",
+"./images/sp_menuGalaxy2.jpg"
 };
-//Image img [4]= {
-//"./images/pic.png",
-//"./images/pic.png",
-//"./images/pic.png",
-//"./images/pic.png"
-//};
 
 //--- From "background" framework ---
 class Texture {
@@ -131,17 +143,27 @@ public:
 
 class Global {
 public:
+	int show_menu = 0; 
 	int credits = 0;
 	int collision_det = 0;
 	int tgif = 0;
+	int highscore = 0;
+	int save_score;
+	int help = 0;
 	int xres, yres;
+	int *arr;
 	char keys[65536];
-	GLuint doneyTexture;
-	Texture tex; //From "background" framework
+	GLuint shipTexture;
+	GLuint enemy1Texture;
+	GLuint creditTexture;
+	GLuint menuTexture;
+	GLuint menuGalTexture;
+	Texture tex; //From "brackground" framework
 	Global() {
 		xres = 1250;
 		yres = 900;
 		memset(keys, 0, 65536);
+		arr = 0;
 	}
 } gl;
 
@@ -150,10 +172,15 @@ public:
 	Vec dir;
 	Vec pos;
 	Vec vel;
+	Vec save_vel;
+	int quadrant[2];
 	float angle;
 	float color[3];
 	bool valid_enemy;
 	int numbullets;
+	int rotated;
+	int first_call;
+	int num_calls_vel;
 public:
 	Ship() {
 		VecZero(dir);
@@ -165,10 +192,15 @@ public:
 		angle = 270.0;
 		color[0] = color[1] = color[2] = 1.0;
 		valid_enemy = 0;
+		quadrant[0] = 0;
+		first_call = 0;
+		quadrant[1] = 0;
+		rotated = 0;
+		num_calls_vel = 1;
 	}
 };
 
-void new_ship(Ship *my_enemy, int a);
+void new_ship(Ship *my_enemy, int a, int resy, int resx);
 
 class Bullet {
 public:
@@ -208,16 +240,18 @@ public:
 	Bullet *ebarr;
 	int nships;
 	int nasteroids;
+	int score;
 	int nbullets;
 	int ebullets;
 	int nenemies;
+	int num_calls_vel;
 	struct timespec bulletTimer;
 	struct timespec ebulletTimer;
 	struct timespec mouseThrustTimer;
 	bool mouseThrustOn;
 public:
 	Game() {
-
+		score = 0;
 		ahead = NULL;
 		barr = new Bullet[MAX_BULLETS];
 		ebarr = new Bullet[100];
@@ -226,6 +260,7 @@ public:
 		ebullets = 0;
 		nships = 0;
 		mouseThrustOn = false;
+		num_calls_vel = 0;
 		//build 10 asteroids...
 		for (int j=0; j<10; j++) {
 			Asteroid *a = new Asteroid;
@@ -260,8 +295,10 @@ public:
 		clock_gettime(CLOCK_REALTIME, &bulletTimer);
 		nenemies = 0;
 		for (int k = 0; k < MAX_ENEMIES; k++) {
-			new_ship(&enemies[k], k);
+			new_ship(&enemies[k], k, gl.yres, gl.xres);
+			nenemies++;
 			std::cout << "Ship position x: " << enemies[k].pos[0] << std::endl;
+			std::cout << "Ship position Y: " << enemies[k].pos[1] << std::endl;
 		
 			//enemies[k].valid_enemy = 0;
 		}
@@ -401,14 +438,21 @@ public:
 	}
 } x11(0, 0);
 
+
 //function prototypes
 void renderTGIF (int, int);
+int circ_mov (Ship *my_enemy);
 void raag_text(int, int);
 void renderDoneyTextCredits(int, int);
 void draw_will_text(int, int);
 void andrew_credit_text(int, int);
 void andrewBackImg(GLuint texture, int xres, int yres, float xc[], float yc[]);
+void andrewDrawShip(GLuint texture, float* pos);
+void andrewDrawEnemy(GLuint texture, float* pos);
 void andrewBackImgMove(float* xc);
+void andrewHelpMenu(int, int, int);
+void andrewHighscoreBox(int, int, int, int* arr);
+void andrewShowMenu(GLuint texture1, GLuint texture2, int xres, int yres);
 //void genAndBindDoneyImage();
 void renderDoneyImage(GLuint, int, int);
 void genAndBindDoneyImage();
@@ -422,6 +466,11 @@ void render();
 int movement(int);
 int destroy_ship(float, float, Asteroid *);
 void det_coll(int yres, int xres);
+void change_vel(Ship *, int, int);
+extern void set_to_non_blocking(const int sock);
+extern void show_cert_data(SSL *ssl, BIO *outbio, const char *hostname);
+extern BIO *ssl_setup_bio(void);
+int * high_score(int score);
 //==========================================================================
 // M A I N
 //==========================================================================
@@ -458,6 +507,46 @@ int main()
 	return 0;
 }
 
+//===============================================
+// Imported from (rainforest framework)
+// 
+//===============================================
+unsigned char *buildAlphaData(Image *img)
+{
+	//add 4th component to RGB stream...
+	int i;
+	int a,b,c;
+	unsigned char *newdata, *ptr;
+	unsigned char *data = (unsigned char *)img->data;
+	newdata = (unsigned char *)malloc(img->width * img->height * 4);
+	ptr = newdata;
+	for (i=0; i<img->width * img->height * 3; i+=3) {
+		a = *(data+0);
+		b = *(data+1);
+		c = *(data+2);
+		*(ptr+0) = a;
+		*(ptr+1) = b;
+		*(ptr+2) = c;
+		//-----------------------------------------------
+		//get largest color component...
+		//*(ptr+3) = (unsigned char)((
+		//		(int)*(ptr+0) +
+		//		(int)*(ptr+1) +
+		//		(int)*(ptr+2)) / 3);
+		//d = a;
+		//if (b >= a && b >= c) d = b;
+		//if (c >= a && c >= b) d = c;
+		//*(ptr+3) = d;
+		//-----------------------------------------------
+		//this code optimizes the commented code above.
+		*(ptr+3) = (a|b|c);
+		//-----------------------------------------------
+		ptr += 4;
+		data += 3;
+	}
+	return newdata;
+}
+
 void init_opengl(void)
 {
 	//OpenGL initialization
@@ -480,21 +569,25 @@ void init_opengl(void)
 	initialize_fonts();
 
 	gl.tex.backImage = &img[0];
+	glGenTextures(1, &gl.creditTexture);
 	glGenTextures(1, &gl.tex.backTexture);
-	glGenTextures(1, &gl.doneyTexture);
+	glGenTextures(1, &gl.shipTexture);
+	glGenTextures(1, &gl.enemy1Texture);
+	glGenTextures(1, &gl.menuTexture);
+	glGenTextures(1, &gl.menuGalTexture);
 
-    // Render Doney's Image
-    //------------------------------------------------------------------
-    //Code borrowed from Gordon Greisel.
+	// Render Doney's Image
+	//------------------------------------------------------------------
+	//Code borrowed from Gordon Greisel.
 	int w = doneyImg.width;
-    int h = doneyImg.height;
-    
-    glBindTexture(GL_TEXTURE_2D, gl.doneyTexture);
-    
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
-        GL_RGB, GL_UNSIGNED_BYTE, doneyImg.data);
+	int h = doneyImg.height;
+
+	glBindTexture(GL_TEXTURE_2D, gl.creditTexture);
+
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
+			GL_RGB, GL_UNSIGNED_BYTE, doneyImg.data);
     //------------------------------------------------------------------
 	// Background Image
 	//--- From "background" framework ---
@@ -510,6 +603,69 @@ void init_opengl(void)
 	gl.tex.yc[0] = 0.0;
 	gl.tex.yc[1] = 1.0;
 	//------------------------------------------------------------------
+	// Ship Image
+	// --- From "rainforest" framework ---
+	int w1 = img[1].width;
+	int h1 = img[1].height;
+	glBindTexture(GL_TEXTURE_2D, gl.shipTexture);
+	//
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	//
+	//must build a new set of data...
+	unsigned char *silhouetteData = buildAlphaData(&img[1]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w1, h1, 0,
+							GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
+	free(silhouetteData);
+	//------------------------------------------------------------------
+	// Enemy Ship Image
+	// --- From "rainforest" framework ---
+	int w2 = img[2].width;
+	int h2 = img[2].height;
+	glBindTexture(GL_TEXTURE_2D, gl.enemy1Texture);
+	//
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	//
+	silhouetteData = buildAlphaData(&img[2]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w2, h2, 0,
+							GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
+	free(silhouetteData);
+	//------------------------------------------------------------------
+	// Menu Image
+	//*
+	int w3 = img[3].width;
+	int h3 = img[3].height;
+	glBindTexture(GL_TEXTURE_2D, gl.menuTexture);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, w3, h3, 0,
+	GL_RGB, GL_UNSIGNED_BYTE, img[3].data);
+
+	glBindTexture(GL_TEXTURE_2D, gl.creditTexture);
+
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
+			GL_RGB, GL_UNSIGNED_BYTE, doneyImg.data);
+	//
+	//*/
+	//------------------------------------------------------------------
+	// Spinning Galaxy Image
+	// --- From "rainforest" framework ---
+	//*
+	int w4 = img[4].width;
+	int h4 = img[4].height;
+	glBindTexture(GL_TEXTURE_2D, gl.menuGalTexture);
+	//
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	//
+	silhouetteData = buildAlphaData(&img[4]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w4, h4, 0,
+							GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
+	free(silhouetteData);
+	//*/
 }
 
 void normalize2d(Vec v)
@@ -567,6 +723,7 @@ void check_mouse(XEvent *e)
 					b->color[1] = 1.0f;
 					b->color[2] = 1.0f;
 					++g.nbullets;
+					++g.score;
 				}
 			}
 		}
@@ -664,6 +821,17 @@ int check_keys(XEvent *e)
 		case XK_d:
 			gl.tgif = gl.tgif ^ 1;
 			break;
+		case XK_h:
+			gl.help = gl.help ^ 1;
+			break;
+		case XK_Tab:
+			gl.highscore = gl.highscore ^ 1;
+			break;
+		case XK_p:
+			gl.save_score = gl.save_score ^ 1;
+			break;
+		case XK_m:
+			gl.show_menu = gl.show_menu ^ 1;
 	}
 	return 0;
 }
@@ -681,6 +849,7 @@ void deleteAsteroid(Game *g, Asteroid *node)
 			node->next->prev = NULL;
 			g->ahead = node->next;
 		}
+
 	} else {
 		if (node->next == NULL) {
 			//at end of list.
@@ -730,11 +899,16 @@ void physics()
 	//Update ship position
 	g.ship.pos[0] += g.ship.vel[0];
 	g.ship.pos[1] += g.ship.vel[1];
-	for (int k = 0; k < MAX_ENEMIES; k++) {
-		g.enemies[k].pos[0] += g.enemies[k].vel[0];
-		g.enemies[k].pos[1] += g.enemies[k].vel[1];	
-
+	
+	for (int k = g.nenemies; k < MAX_ENEMIES; k++) {
+		new_ship(&g.enemies[k], k, gl.yres, gl.xres);
+		g.nenemies++;
+		std::cout << "Ship position x: " << g.enemies[k].pos[0] << std::endl;
+		std::cout << "Ship position y: " << g.enemies[k].pos[1] << std::endl;
+		
+		//enemies[k].valid_enemy = 0;
 	}
+
 	//Check for collision with window edges
 	if (g.ship.pos[0] < 0.0) {
 		g.ship.pos[0] += (float)gl.xres;
@@ -910,40 +1084,7 @@ void physics()
 	} else {
 		gl.collision_det = 0;
 	}
-
-
-	if (gl.keys[XK_Left]) {
-		g.ship.vel[0] = movement(0);
-	}
-
-	if (!gl.keys[XK_Left]) {
-		g.ship.vel[0] = 0;
-	}
-
-	if (gl.keys[XK_Right]) {
-		g.ship.vel[0] = movement(1);    
-	}
 	
-	if (!gl.keys[XK_Up]) {
-		g.ship.vel[1] = 0;
-	}
-
-	if (gl.keys[XK_Up]) {
-		g.ship.vel[1] = 2;
-	}
-
-	if (gl.keys[XK_Down]) {
-		g.ship.vel[1] = movement(0);
-	}
-
-	if (gl.keys[XK_Down] && gl.keys[XK_Up]) {
-		g.ship.vel[1] = 0;
-	}
-
-	if (gl.keys[XK_Left] && gl.keys[XK_Right]) {
-		g.ship.vel[0] = 0;
-	}
-
 	if (gl.keys[XK_space]) {
 		//a little time between each bullet
 		struct timespec bt;
@@ -973,9 +1114,44 @@ void physics()
 				b->color[1] = 1.0f;
 				b->color[2] = 1.0f;
 				g.nbullets++;
+				++g.score;
 			}
 		}
 	}
+
+
+	if (gl.keys[XK_Left]) {
+		g.ship.vel[0] = movement(0);
+	}
+
+	if (!gl.keys[XK_Left] && !gl.keys[XK_Right]) {
+		g.ship.vel[0] = 0;
+	}
+
+	if (gl.keys[XK_Right]) {
+		g.ship.vel[0] = movement(1);    
+	}
+	
+	if (!gl.keys[XK_Up] && !gl.keys[XK_Down]) {
+		g.ship.vel[1] = 0;
+	}
+
+	if (gl.keys[XK_Up]) {
+		g.ship.vel[1] = movement(1);
+	}
+
+	if (gl.keys[XK_Down]) {
+		g.ship.vel[1] = movement(0);
+	}
+
+	if (gl.keys[XK_Down] && gl.keys[XK_Up]) {
+		g.ship.vel[1] = 0;
+	}
+
+	if (gl.keys[XK_Left] && gl.keys[XK_Right]) {
+		g.ship.vel[0] = 0;
+	}
+
 	if (g.mouseThrustOn) {
 		//should thrust be turned off
 		struct timespec mtt;
@@ -984,6 +1160,57 @@ void physics()
 		//std::cout << "tdif: " << tdif << std::endl;
 		if (tdif < -0.3)
 			g.mouseThrustOn = false;
+	}
+
+	int quadrant = 0;
+
+	for (int k = 0; k < MAX_ENEMIES; k++) {
+		g.enemies[k].pos[0] += g.enemies[k].vel[0];
+		g.enemies[k].pos[1] += g.enemies[k].vel[1];
+		//std::cout << "Y pos: " << g.enemies[k].pos[1] << std::endl;	
+		if (g.enemies[k].pos[1] > gl.yres / 3 && g.enemies[k].pos[1] < 
+			(gl.yres - gl.yres/3)) {
+			//std::cout << "Now rotated: " << g.enemies[k].pos[1] << std::endl;
+			g.enemies[k].rotated = 1;
+		}
+
+		if (g.enemies[k].rotated == 1) {
+			g.enemies[k].first_call += 1;
+			quadrant = circ_mov(&g.enemies[k]);
+		}
+
+		if (g.enemies[k].pos[0] < 0.0) {
+			g.enemies[k].num_calls_vel = 1;
+			g.enemies[k].valid_enemy = 0;
+			memcpy(&g.enemies[k], &g.enemies[g.nenemies-1], sizeof(Ship));
+			g.nenemies--;
+		}
+		
+		else if (g.enemies[k].pos[0] > (float)gl.xres) {
+			g.enemies[k].num_calls_vel = 1;
+			g.enemies[k].valid_enemy = 0;
+			memcpy(&g.enemies[k], &g.enemies[g.nenemies-1], sizeof(Ship));	
+			g.nenemies--;
+		}
+
+		else if (g.enemies[k].pos[1] < 0) {
+			g.enemies[k].valid_enemy = 0;
+			g.enemies[k].num_calls_vel = 1;
+			memcpy(&g.enemies[k], &g.enemies[g.nenemies-1], sizeof(Ship));		
+			g.nenemies--;
+
+		}
+				
+		else if (g.enemies[k].pos[1] > ((float)gl.yres)) {
+			std::cout << g.enemies[k].pos[1] << std::endl;
+			g.enemies[k].valid_enemy = 0;
+			g.enemies[k].num_calls_vel = 1;
+			memcpy(&g.enemies[k], &g.enemies[g.nenemies-1], sizeof(Ship));
+			g.nenemies--;
+		}
+		std::cout << "Quadrant " << quadrant << std::endl;
+		g.num_calls_vel += 1;
+		change_vel(&g.enemies[k], g.num_calls_vel, quadrant);
 	}
 }
 
@@ -994,7 +1221,7 @@ void enemy_bullets()
 	clock_gettime(CLOCK_REALTIME, &bt);
 	double ts = timeDiff(&g.ebulletTimer, &bt);
 	
-	if (ts > 0.1) {
+	if (ts > 0.4) {
 		timeCopy(&g.ebulletTimer, &bt);
 		for (int i = 0; i<MAX_ENEMIES; i++) {
 		if (g.ebullets < 100 && g.enemies[i].numbullets < 50) {
@@ -1025,31 +1252,69 @@ void enemy_bullets()
 }
 
 void render()
-{
+{	
+
 	glClear(GL_COLOR_BUFFER_BIT);
+
 	//------------------------------------------------------------------------
 	//Background Texture
 	andrewBackImg(gl.tex.backTexture, gl.xres, gl.yres, gl.tex.xc, gl.tex.yc);
 
 	Rect r;
-	//
+	//int ytrack;
 	r.bot = gl.yres - 20;
 	r.left = 10;
 	r.center = 0;
-	ggprint8b(&r, 16, 0x00ff0000, "3350 - Asteroids");
+	ggprint8b(&r, 16, 0x00ff0000, "Space Patrol");
 	ggprint8b(&r, 16, 0x00ffff00, "n bullets: %i", g.nbullets);
 	ggprint8b(&r, 16, 0x00ffff00, "n asteroids: %i", g.nasteroids);
-	ggprint8b(&r, 16, 0x00ffff00, "Press c for credits");
 
-	ggprint8b(&r, 16, 0x00ffff00, "Press d if its Friday");
+	//Revision needed
+	//-----------------------------------------------------------------------
+	ggprint8b(&r, 16, 0x00ff0000, "------- Best 4----------");
+	ggprint8b(&r, 16, 0x00ffff00, " Score   %i", g.score);
+	ggprint8b(&r, 16, 0x00ffff00, " Name ");
+	ggprint8b(&r, 16, 0x00ffff00, " Game Over ");
+	ggprint8b(&r, 16, 0x00ffff00, " Your Score %i ", g.score);
+    	ggprint8b(&r, 16, 0x00ffff00, " Best Score ");
+    	ggprint8b(&r, 16, 0x00ffff00, " Tap to restart ");
+	//-----------------------------------------------------------------------
+
+	if (gl.help == 1) {
+		andrewHelpMenu(gl.yres, gl.xres, r.bot);
+	}
+	else {
+		//r.bot = gl.yres - 20;
+		//r.left = gl.xres - 175;
+		ggprint8b(&r, 16, 0x00ff4500, "[H] Help Menu");
+	}
+	//if (gl.show_menu == 1) {
+	//	ggprint8b(&r, 16, 0x00ffff00, " MENU SHOULD BEEN SHOWN ");
+	//}
+
 
 	if (gl.credits == 1) {
+		renderDoneyImage(gl.creditTexture, gl.yres, gl.xres);
 		andrew_credit_text(gl.yres, gl.xres);
 		renderDoneyTextCredits(gl.yres, gl.xres);
-		renderDoneyImage(gl.doneyTexture, gl.yres, gl.xres);
 		draw_will_text(gl.yres, gl.xres);
 		raag_text(gl.yres, gl.xres);
-    }
+	}
+	if (gl.highscore == 1) {
+		if (!gl.arr) {
+			int arrTest[] = {1, 2, 3, 4, 5};
+			andrewHighscoreBox(gl.yres, gl.xres, g.score, arrTest);
+		} else {
+			andrewHighscoreBox(gl.yres, gl.xres, g.score, gl.arr);
+		}
+	}
+
+	if (gl.save_score == 1) {
+		gl.arr = high_score(g.score);
+		gl.save_score = gl.save_score ^ 1;
+		std::cout << *(gl.arr) << std::endl;
+		//andrewHighscoreBox(gl.yres, gl.xres, g.score, *(arr));
+	}
 
 	if (gl.collision_det == 1) {
 		det_coll(gl.yres, gl.xres);
@@ -1057,6 +1322,7 @@ void render()
     
 	if (gl.tgif == 1) {
 		renderTGIF(gl.yres, gl.xres);
+		high_score(g.score);
 	}
 
 
@@ -1086,6 +1352,8 @@ void render()
 	glVertex2f(0.0f, 0.0f);
 	glEnd();
 	glPopMatrix();
+	//Draw the ship texture
+	andrewDrawShip(gl.shipTexture, g.ship.pos);
 
 	for (int k = 0; k < MAX_ENEMIES; k++) {
 		if (g.enemies[k].valid_enemy == 1) {
@@ -1111,11 +1379,11 @@ void render()
 			glVertex2f(0.0f, 0.0f);
 			glEnd();
 			glPopMatrix();
-			}
-
+			andrewDrawEnemy(gl.enemy1Texture, g.enemies[k].pos);
+		}
 	}
 
-	if (gl.keys[XK_Up] || g.mouseThrustOn) {
+	if (gl.keys[XK_Right] || g.mouseThrustOn) {
 		int i;
 		//draw thrust
 		Flt rad = ((g.ship.angle+90.0) / 360.0f) * PI * 2.0;
@@ -1202,6 +1470,10 @@ void render()
 		glVertex2f(b->pos[0]+1.0f, b->pos[1]-1.0f);
 		glVertex2f(b->pos[0]+1.0f, b->pos[1]+1.0f);
 		glEnd();
+	}
+
+	if (gl.show_menu == 1) {
+		andrewShowMenu(gl.menuTexture, gl.menuGalTexture, gl.xres, gl.yres);
 	}
 
 }
