@@ -1208,7 +1208,7 @@ void physics()
 			memcpy(&g.enemies[k], &g.enemies[g.nenemies-1], sizeof(Ship));
 			g.nenemies--;
 		}
-		std::cout << "Quadrant " << quadrant << std::endl;
+		//std::cout << "Quadrant " << quadrant << std::endl;
 		g.num_calls_vel += 1;
 		change_vel(&g.enemies[k], g.num_calls_vel, quadrant);
 	}
@@ -1312,6 +1312,7 @@ void render()
 	if (gl.save_score == 1) {
 		gl.arr = high_score(g.score);
 		gl.save_score = gl.save_score ^ 1;
+		std::cout << "Contacted server" << std::endl;
 		std::cout << *(gl.arr) << std::endl;
 		//andrewHighscoreBox(gl.yres, gl.xres, g.score, *(arr));
 	}
@@ -1320,11 +1321,11 @@ void render()
 		det_coll(gl.yres, gl.xres);
 	}
     
-	if (gl.tgif == 1) {
+	/*if (gl.tgif == 1) {
 		renderTGIF(gl.yres, gl.xres);
 		high_score(g.score);
 	}
-
+	*/
 
 
 	//renderDoneyImage();
