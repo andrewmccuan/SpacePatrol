@@ -469,7 +469,7 @@ void det_coll_enemy(int *num_enemies, int num_bullets, Ship *enemies,
 	//std::cout << "Pos x " << enemies[0].pos[0] << std::endl;
 	//std::cout << "Pos Y " << enemies[0].pos[1] << std::endl;
 	for (int i = 0; i < num_bullets; i++) {
-		for (int k = 0; k < 2; k++) {
+		for (int k = 0; k < *num_enemies; k++) {
 			//std::cout << "Num Enemies " << *num_enemies << std::endl;
 			if ((((b[i].pos[0]) - (enemies[k].pos[0] - 30)) >= 0) &&
 				(((enemies[k].pos[0] + 30)) - b[i].pos[0] >= 0) &&  	
