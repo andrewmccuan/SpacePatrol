@@ -70,6 +70,7 @@ void new_ship(Ship *my_enemy, int countr, int yres, int xres) {
 	}
 	my_enemy->angle = 90;
 	my_enemy->valid_enemy = 1;
+	my_enemy->rotated = 0;
 	my_enemy->color[0] = my_enemy->color[1] = my_enemy->color[2] = 1.0;
 	xpos = (Flt)(rand() % xres);
 	my_enemy->pos[0] = xpos;
@@ -443,8 +444,8 @@ void change_vel(Ship *my_enemy, int num_calls, int ship_quadrant)
 
 	if (ship_quadrant > 0 && my_enemy->num_calls_vel == 1) {
 		std::cout << "In change V" << std::endl;
-		xvel = rand() % 5;
-		yvel = rand() % 5;
+		xvel = rand() % 5 + 1;
+		yvel = rand() % 5 + 1;
 		if (pos_x == 1) {
 			my_enemy->vel[0] = xvel;
 		} else {
@@ -457,5 +458,29 @@ void change_vel(Ship *my_enemy, int num_calls, int ship_quadrant)
 			my_enemy->vel[1] = -1 * yvel;
 		}
 		my_enemy->num_calls_vel += 1;
+	}
+}
+
+void det_coll_enemy(int *num_enemies, int num_bullets, Ship *enemies,
+	Bullet *barr)
+{
+	Bullet *b = barr;
+	//std::cout << "Num Enemies " << *num_enemies << std::endl;
+	//std::cout << "Pos x " << enemies[0].pos[0] << std::endl;
+	//std::cout << "Pos Y " << enemies[0].pos[1] << std::endl;
+	for (int i = 0; i < num_bullets; i++) {
+		for (int k = 0; k < 2; k++) {
+			//std::cout << "Num Enemies " << *num_enemies << std::endl;
+			if ((((b[i].pos[0]) - (enemies[k].pos[0] - 30)) >= 0) &&
+				(((enemies[k].pos[0] + 30)) - b[i].pos[0] >= 0) &&  	
+				(((b[i].pos[1]) - (enemies[k].pos[1] - 30)) >= 0) &&
+				(((enemies[k].pos[1] + 30)) - b[i].pos[1] >= 0)) {
+					
+				std::cout << "Collision " <<  std::endl;
+				enemies[k].pos[1] = 40000;
+				enemies[k].pos[0] = 40000;
+
+			}
+		}
 	}
 }
