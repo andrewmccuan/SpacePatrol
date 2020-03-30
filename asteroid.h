@@ -26,10 +26,15 @@ public:
         Vec dir;
         Vec pos;
         Vec vel;
+	Vec save_vel;
+	int quadrant[2];
         float angle;
         float color[3];
         bool valid_enemy; 
         int numbullets;	
+	int rotated;
+	int first_call;
+	int num_calls_vel;
 };
 
 class Bullet {

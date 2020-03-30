@@ -172,10 +172,15 @@ public:
 	Vec dir;
 	Vec pos;
 	Vec vel;
+	Vec save_vel;
+	int quadrant[2];
 	float angle;
 	float color[3];
 	bool valid_enemy;
 	int numbullets;
+	int rotated;
+	int first_call;
+	int num_calls_vel;
 public:
 	Ship() {
 		VecZero(dir);
@@ -187,6 +192,11 @@ public:
 		angle = 270.0;
 		color[0] = color[1] = color[2] = 1.0;
 		valid_enemy = 0;
+		quadrant[0] = 0;
+		first_call = 0;
+		quadrant[1] = 0;
+		rotated = 0;
+		num_calls_vel = 1;
 	}
 };
 
@@ -254,6 +264,7 @@ public:
 	int nbullets;
 	int ebullets;
 	int nenemies;
+	int num_calls_vel;
 	struct timespec bulletTimer;
 	struct timespec ebulletTimer;
 	struct timespec mouseThrustTimer;
@@ -270,6 +281,7 @@ public:
 		ebullets = 0;
 		nships = 0;
 		mouseThrustOn = false;
+		num_calls_vel = 0;
 		//build 10 asteroids...
 		for (int j=0; j<10; j++) {
 			Asteroid *a = new Asteroid;
@@ -483,6 +495,7 @@ public:
 //function prototypes
 void renderPowerUps(PowerUp*);
 void renderTGIF (int, int);
+int circ_mov (Ship *my_enemy);
 void raag_text(int, int);
 void renderDoneyTextCredits(int, int);
 void draw_will_text(int, int);
@@ -507,10 +520,12 @@ void render();
 int movement(int);
 int destroy_ship(float, float, Asteroid *);
 void det_coll(int yres, int xres);
+void change_vel(Ship *, int, int);
 extern void set_to_non_blocking(const int sock);
 extern void show_cert_data(SSL *ssl, BIO *outbio, const char *hostname);
 extern BIO *ssl_setup_bio(void);
 int * high_score(int score);
+void det_coll_enemy(int *num_enemies, int num_bullets, Ship *enemies, Bullet *barr); 
 //==========================================================================
 // M A I N
 //==========================================================================
@@ -549,6 +564,7 @@ int main()
 
 //===============================================
 // Imported from (rainforest framework)
+// 
 //===============================================
 unsigned char *buildAlphaData(Image *img)
 {
@@ -676,10 +692,10 @@ void init_opengl(void)
 	int w3 = img[3].width;
 	int h3 = img[3].height;
 	glBindTexture(GL_TEXTURE_2D, gl.menuTexture);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, w3, h3, 0,
-        GL_RGB, GL_UNSIGNED_BYTE, img[3].data);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, w3, h3, 0,
+	GL_RGB, GL_UNSIGNED_BYTE, img[3].data);
 
 	glBindTexture(GL_TEXTURE_2D, gl.creditTexture);
 
@@ -931,10 +947,9 @@ void buildAsteroidFragment(Asteroid *ta, Asteroid *a)
 
 void physics()
 {
+	//std::cout << "Num enemies" << g.nenemies <<std::endl;
 	//Moves the background
 	andrewBackImgMove(gl.tex.xc);
-
-
 
 	Flt d0,d1,dist;
 	//Update ship position
@@ -942,30 +957,14 @@ void physics()
 	g.ship.pos[1] += g.ship.vel[1];
 	
 	for (int k = g.nenemies; k < MAX_ENEMIES; k++) {
-		new_ship(&g.enemies[k], k, gl.yres, gl.xres);
 		g.nenemies++;
+		new_ship(&g.enemies[k], k, gl.yres, gl.xres);
 		std::cout << "Ship position x: " << g.enemies[k].pos[0] << std::endl;
 		std::cout << "Ship position y: " << g.enemies[k].pos[1] << std::endl;
 		
 		//enemies[k].valid_enemy = 0;
 	}
 
-	//Update powerup position
-	g.next->pos[0] -= g.next->vel[0];
-
-	//Check for collision with window edges
-	if (g.ship.pos[0] < 0.0) {
-		g.ship.pos[0] += (float)gl.xres;
-	}
-	else if (g.ship.pos[0] > (float)gl.xres) {
-		g.ship.pos[0] -= (float)gl.xres;
-	}
-	else if (g.ship.pos[1] < 0.0) {
-		g.ship.pos[1] += (float)gl.yres;
-	}
-	else if (g.ship.pos[1] > (float)gl.yres) {
-		g.ship.pos[1] -= (float)gl.yres;
-	}
 	//
 	//
 	//Update bullet positions
@@ -1205,22 +1204,52 @@ void physics()
 		if (tdif < -0.3)
 			g.mouseThrustOn = false;
 	}
-	for (int k = 0; k < MAX_ENEMIES; k++) {
+
+	int quadrant = 0;
+	det_coll_enemy(&g.nenemies, g.nbullets, g.enemies, g.barr); 
+	for (int k = 0; k < g.nenemies; k++) {
+		//std::cout << "Enemy " << k  << " Pos: " << g.enemies[k].pos[0] << " " << g.enemies[k].pos[1] << std::endl;
 		g.enemies[k].pos[0] += g.enemies[k].vel[0];
 		g.enemies[k].pos[1] += g.enemies[k].vel[1];
+		//std::cout << "Y pos: " << g.enemies[k].pos[1] << std::endl;	
+		if (g.enemies[k].pos[1] > gl.yres / 3 && g.enemies[k].pos[1] < 
+			(gl.yres - gl.yres/3)) {
+			//std::cout << "Now rotated: " << g.enemies[k].pos[1] << std::endl;
+			g.enemies[k].rotated = 1;
+		}
+
+		if (g.enemies[k].rotated == 1) {
+			g.enemies[k].first_call += 1;
+			quadrant = circ_mov(&g.enemies[k]);
+		}
 
 		if (g.enemies[k].pos[0] < 0.0) {
+			g.enemies[k].num_calls_vel = 1;
 			g.enemies[k].valid_enemy = 0;
-			memcpy(&g.enemies[k], &g.enemies[g.nenemies-1], sizeof(Ship));	
+			g.enemies[k].rotated = 0;
+			g.enemies[k].vel[0] = 0;
+			g.enemies[k].vel[1] = 0;
+			memcpy(&g.enemies[k], &g.enemies[g.nenemies-1], sizeof(Ship));
+				
 			g.nenemies--;
 		}
+		
 		else if (g.enemies[k].pos[0] > (float)gl.xres) {
+			g.enemies[k].num_calls_vel = 1;
 			g.enemies[k].valid_enemy = 0;
+			g.enemies[k].rotated = 0;
+			g.enemies[k].vel[0] = 0;
+			g.enemies[k].vel[1] = 0;
 			memcpy(&g.enemies[k], &g.enemies[g.nenemies-1], sizeof(Ship));	
 			g.nenemies--;
 		}
+
 		else if (g.enemies[k].pos[1] < 0) {
 			g.enemies[k].valid_enemy = 0;
+			g.enemies[k].num_calls_vel = 1;
+			g.enemies[k].vel[0] = 0;
+			g.enemies[k].vel[1] = 0;
+			g.enemies[k].rotated = 0;
 			memcpy(&g.enemies[k], &g.enemies[g.nenemies-1], sizeof(Ship));		
 			g.nenemies--;
 
@@ -1229,12 +1258,16 @@ void physics()
 		else if (g.enemies[k].pos[1] > ((float)gl.yres)) {
 			std::cout << g.enemies[k].pos[1] << std::endl;
 			g.enemies[k].valid_enemy = 0;
-			memcpy(&g.enemies[k], &g.enemies[g.nenemies-1], sizeof(Ship));		
-			g.nenemies--;		
+			g.enemies[k].num_calls_vel = 1;
+			g.enemies[k].rotated = 0;
+			g.enemies[k].vel[0] = 0;
+			g.enemies[k].vel[1] = 0;		
+			memcpy(&g.enemies[k], &g.enemies[g.nenemies-1], sizeof(Ship));
+			g.nenemies--;
 		}
-		
-				
-
+		//std::cout << "Quadrant " << quadrant << std::endl;
+		g.num_calls_vel += 1;
+		change_vel(&g.enemies[k], g.num_calls_vel, quadrant);
 	}
 }
 
@@ -1247,8 +1280,10 @@ void enemy_bullets()
 	
 	if (ts > 0.4) {
 		timeCopy(&g.ebulletTimer, &bt);
-		for (int i = 0; i<MAX_ENEMIES; i++) {
-		if (g.ebullets < 100 && g.enemies[i].numbullets < 50) {
+		for (int i = 0; i<g.nenemies; i++) {
+		if (g.ebullets < 100 && g.enemies[i].numbullets < 50 && 
+			g.enemies[i].valid_enemy) {
+
 			g.enemies[i].numbullets += 1;
 			Bullet *b = &g.ebarr[g.ebullets];
 			timeCopy(&b->time, &bt);
@@ -1336,6 +1371,7 @@ void render()
 	if (gl.save_score == 1) {
 		gl.arr = high_score(g.score);
 		gl.save_score = gl.save_score ^ 1;
+		std::cout << "Contacted server" << std::endl;
 		std::cout << *(gl.arr) << std::endl;
 		//andrewHighscoreBox(gl.yres, gl.xres, g.score, *(arr));
 	}
@@ -1344,7 +1380,7 @@ void render()
 		det_coll(gl.yres, gl.xres);
 	}
     
-	if (gl.tgif == 1) {
+	/*if (gl.tgif == 1) {
 		renderTGIF(gl.yres, gl.xres);
 		high_score(g.score);
 	}
@@ -1375,8 +1411,9 @@ void render()
 	//Draw the ship texture
 	andrewDrawShip(gl.shipTexture, g.ship.pos);
 
-	for (int k = 0; k < MAX_ENEMIES; k++) {
+	for (int k = 0; k < g.nenemies; k++) {
 		if (g.enemies[k].valid_enemy == 1) {
+			//std::cout << "Enemy " << k  << " Pos: " << g.enemies[k].pos[0] << " " << g.enemies[k].pos[1] << std::endl;
 			glColor3fv(g.enemies[k].color);
 			glPushMatrix();
 			glTranslatef(g.enemies[k].pos[0], g.enemies[k].pos[1],
