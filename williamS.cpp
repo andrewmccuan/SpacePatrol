@@ -70,6 +70,7 @@ void new_ship(Ship *my_enemy, int countr, int yres, int xres) {
 	}
 	my_enemy->angle = 90;
 	my_enemy->valid_enemy = 1;
+	my_enemy->rotated = 0;
 	my_enemy->color[0] = my_enemy->color[1] = my_enemy->color[2] = 1.0;
 	xpos = (Flt)(rand() % xres);
 	my_enemy->pos[0] = xpos;
@@ -302,6 +303,7 @@ int * high_score(int score)
 int circ_mov (Ship *my_enemy)
 {
 	int dir_flag = 0;
+
 	if (my_enemy->first_call == 1) {
 		my_enemy->save_vel[0] = 3;
 		my_enemy->save_vel[1] = 3;
@@ -309,16 +311,17 @@ int circ_mov (Ship *my_enemy)
 		my_enemy->vel[1] = 0;
 		my_enemy->quadrant[0] = 4;
 	}
-	if ((my_enemy->quadrant[0] == my_enemy->quadrant[1]) && (my_enemy->first_call > 126)) {
+	// Check to see if ship has performed a loop already
+	if ((my_enemy->quadrant[0] == my_enemy->quadrant[1]) && 
+			(my_enemy->first_call > 126)) {
+		
 		my_enemy->rotated = 0;
 		return 1;
 	}
+	// to do: add the conditioninal to this if 
 	if (1) {
-		//std::cout << "In if" << std::endl;
+		// Find which quadrant of the trajectory the ship is in 
 		if (my_enemy->vel[0] >= 0 && my_enemy->vel[1] > 0) {
-			//std::cout << "In 4th" << std::endl;
-			//std::cout << "" << std::endl;
-
 			if (my_enemy->first_call == 1) {
 				my_enemy->quadrant[0] = 4;
 			}
@@ -335,15 +338,14 @@ int circ_mov (Ship *my_enemy)
 				my_enemy->quadrant[1] = 4;
 			}
 		}
-		
+		// Find which quadrant of the trajectory the ship is in 
 		if ((float)my_enemy->vel[0] > 0 && (float)my_enemy->vel[1] <= 0) {
-			//std::cout << "In 3rd" << std::endl;
+			// Determine if the ship is entering a new quadrant
 			if (my_enemy->vel[1] > -0.1 && my_enemy->vel[1] < 0.1) {
 				my_enemy->vel[1] = 0;
 				my_enemy->vel[0] = my_enemy->save_vel[0];
 				my_enemy->quadrant[1] = 4;
 			} else {
-				
 				dir_flag = 2;
 				my_enemy->quadrant[1] = 3;
 			}
@@ -363,6 +365,7 @@ int circ_mov (Ship *my_enemy)
 
 		if ((float)my_enemy->vel[0] < 0 && (float)my_enemy->vel[1] <= 0) {
 			//std::cout << "In 2nd" << std::endl;
+			// Determine if the ship is entering a new quadrant
 			if (my_enemy->vel[0] > -0.1 && my_enemy->vel[0] < 0.1) {
 				my_enemy->vel[0] = 0;
 				my_enemy->vel[1] = -1 * my_enemy->save_vel[1];
@@ -372,7 +375,7 @@ int circ_mov (Ship *my_enemy)
 				my_enemy->quadrant[1] = 2;
 			}
 		}
-
+		// Change the ships velocity
 		if (my_enemy->quadrant[1] == 4) {
 			
 			if (my_enemy->vel[0] > 0) {
@@ -383,7 +386,7 @@ int circ_mov (Ship *my_enemy)
 			}
 			return 0;
 		}
-
+		// Change the ships velocity
 		if (my_enemy->quadrant[1] == 3) {
 			
 			if (my_enemy->vel[1] < 0) {
@@ -396,7 +399,7 @@ int circ_mov (Ship *my_enemy)
 			return 0;
 
 		}
-
+		// Change the ships velocity
 		if (my_enemy->quadrant[1] == 2) {
 			
 			if (my_enemy->vel[0] < 0) {
@@ -443,8 +446,8 @@ void change_vel(Ship *my_enemy, int num_calls, int ship_quadrant)
 
 	if (ship_quadrant > 0 && my_enemy->num_calls_vel == 1) {
 		std::cout << "In change V" << std::endl;
-		xvel = rand() % 5;
-		yvel = rand() % 5;
+		xvel = rand() % 5 + 1;
+		yvel = rand() % 5 + 1;
 		if (pos_x == 1) {
 			my_enemy->vel[0] = xvel;
 		} else {
@@ -457,5 +460,70 @@ void change_vel(Ship *my_enemy, int num_calls, int ship_quadrant)
 			my_enemy->vel[1] = -1 * yvel;
 		}
 		my_enemy->num_calls_vel += 1;
+	}
+}
+
+void det_coll_enemy(int *num_enemies, int num_bullets, Ship *enemies,
+	Bullet *barr)
+{
+	Bullet *b = barr;
+	for (int i = 0; i < num_bullets; i++) {
+		for (int k = 0; k < *num_enemies; k++) {
+			//std::cout << "Num Enemies " << *num_enemies << std::endl;
+			if ((((b[i].pos[0]) - (enemies[k].pos[0] - 30)) >= 0) &&
+				(((enemies[k].pos[0] + 30)) - b[i].pos[0] >= 0) &&  	
+				(((b[i].pos[1]) - (enemies[k].pos[1] - 30)) >= 0) &&
+				(((enemies[k].pos[1] + 30)) - b[i].pos[1] >= 0)) {
+					
+				std::cout << "Collision " <<  std::endl;
+				enemies[k].pos[1] = 40000;
+				enemies[k].pos[0] = 40000;
+
+			}
+		}
+	}
+}
+
+// Creates a ship that moves from the righ of the screen to the left
+void new_ship_rightspawn(Ship *my_enemy, int countr, int yres, int xres) {
+	int xpos = xres - 1;
+	int v2;
+	bool ypos = 0;
+	if (countr == 0) {
+		srand (time(NULL));
+	}
+	// set up the new enemies variables
+	my_enemy->angle = 90;
+	my_enemy->valid_enemy = 1;
+	my_enemy->rotated = 1;
+	my_enemy->color[0] = my_enemy->color[1] = my_enemy->color[2] = 1.0;
+	ypos = (Flt)(rand() % yres);
+	my_enemy->pos[0] = xpos;
+	my_enemy->numbullets = 0;
+	my_enemy->first_call = 0;
+
+	// Set x velocity to a value between 1 and 3
+	v2 = rand() % 2 + 1;
+	my_enemy->vel[0] = v2;
+	
+	// set y velocity to 0
+	my_enemy->vel[1] = ypos;
+	my_enemy->pos[2] = 0.0f;
+}
+
+void det_coll_player(int num_bullets, Ship *player,	Bullet *barr)
+{
+	Bullet *b = barr;
+	for (int i = 0; i < num_bullets; i++) {
+		if ((((b[i].pos[0]) - (player->pos[0] - 30)) >= 0) &&
+				(((player->pos[0] + 30)) - b[i].pos[0] >= 0) &&  	
+				(((b[i].pos[1]) - (player->pos[1] - 30)) >= 0) &&
+				(((player->pos[1] + 30)) - b[i].pos[1] >= 0)) {
+					
+			std::cout << "Collision " <<  std::endl;
+			// Collision detected
+			// Display explosion at position of ship if hp = 0
+			// Otherwise decrement hp
+		}
 	}
 }
