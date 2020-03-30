@@ -6,12 +6,12 @@
 #include <GL/glx.h>
 #include "fonts.h"
 #include "image.h"
+#include "asteroid.h"
 #include <openssl/crypto.h>
 #include <openssl/x509.h>
 #include <openssl/pem.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
-
 
 // Friday changed text color
 void renderDoneyTextCredits(int yres, int xres)
@@ -20,7 +20,7 @@ void renderDoneyTextCredits(int yres, int xres)
     r.bot = yres - 50;
     r.left = xres/2;
     r.center = 0;
-    ggprint8b(&r, 75, 0x8926FF, "Doney Peters - CEO (Chief Enemy Officer)");
+    ggprint8b(&r, 75, 0x8926FF, "Doney Peters");
 }
 
 //For Friday exercise 2/21/2020
@@ -39,6 +39,7 @@ void renderDoneyImage(GLuint texture, int yres, int xres)
 {
     glBindTexture(GL_TEXTURE_2D, texture);
     glBegin(GL_QUADS);
+    glColor3f(1.0,1.0,1.0);
     glTexCoord2f(0.0f, 1.0f); glVertex2i(0,0);
     glTexCoord2f(0.0f, 0.0f); glVertex2i(0,yres);
     glTexCoord2f(1.0f, 0.0f); glVertex2i(xres,yres);
@@ -60,3 +61,60 @@ BIO *ssl_setup_bio(void)
     return bio;
 }
 
+void renderPowerUps(PowerUp *ahead)
+{
+	PowerUp *a = ahead;
+	while (a) {
+		//Log("draw Power Up...\n");
+		glColor3fv(a->color);
+		glPushMatrix();
+		glTranslatef(a->pos[0], a->pos[1], a->pos[2]);
+		glBegin(GL_LINE_LOOP);
+		//Log("%i verts\n",a->nverts);
+		for (int j=0; j<a->nverts; j++) {
+			glVertex2f(a->vert[j][0], a->vert[j][1]);
+		}
+		glEnd();
+		glPopMatrix();
+		glColor3f(1.0f, 0.0f, 0.0f);
+		glBegin(GL_POINTS);
+		glVertex2f(a->pos[0], a->pos[1]);
+		glEnd();
+		a = a->next;
+	}
+}
+
+/*
+
+void buildPowerUp()
+{
+    PowerUp *p = new PowerUp;
+	p->nverts = 8;
+	p->radius = rnd()*80.0 + 40.0;
+	Flt r2 = p->radius / 2.0;
+	Flt angle = 0.0f;
+	Flt inc = (PI * 2.0) / (Flt)p->nverts;
+	for (int i=0; i<a->nverts; i++) {
+		p->vert[i][0] = sin(angle) * (r2 + rnd() * p->radius);
+		p->vert[i][1] = cos(angle) * (r2 + rnd() * p->radius);
+		angle += inc;
+	}
+	p->pos[0] = (Flt)(rand() % gl.xres);
+	p->pos[1] = (Flt)(rand() % gl.yres);
+	p->pos[2] = 0.0f;
+	p->angle = 0.0;
+	p->rotate = rnd() * 4.0 - 2.0;
+	p->color[0] = 0.8;
+	p->color[1] = 0.8;
+	p->color[2] = 0.7;
+	p->vel[0] = (Flt)(rnd()*2.0-1.0);
+	p->vel[1] = (Flt)(rnd()*2.0-1.0);
+	//std::cout << "asteroid" << std::endl;
+	//add to front of linked list
+	p->next = ahead;
+	if (ahead != NULL)
+		ahead->prev = a;
+	ahead = a;
+	++nasteroids;
+}
+*/

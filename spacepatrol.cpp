@@ -221,11 +221,31 @@ public:
 	}
 };
 
+class PowerUp {
+public:
+	Vec pos;
+	Vec vel;
+	int nverts;
+	Flt radius;
+	Vec vert[8];
+	float angle;
+	float rotate;
+	float color[3];
+	struct PowerUp *prev;
+	struct PowerUp *next;
+public:
+	PowerUp() {
+		prev = NULL;
+		next = NULL;
+	}
+};
+
 class Game {
 public:
 	Ship ship;
 	Ship enemies[MAX_ENEMIES];
 	Asteroid *ahead;
+	PowerUp *next;
 	Bullet *barr;
 	Bullet *ebarr;
 	int nships;
@@ -242,6 +262,7 @@ public:
 	Game() {
 		score = 0;
 		ahead = NULL;
+		next = NULL;
 		barr = new Bullet[MAX_BULLETS];
 		ebarr = new Bullet[100];
 		nasteroids = 0;
@@ -280,6 +301,38 @@ public:
 			ahead = a;
 			++nasteroids;
 		}
+
+		//----------------------------------------------------------------
+		//Draw a single PowerUp
+		PowerUp *p = new PowerUp;
+		p->nverts = 4;
+		p->radius = 40.0/2;
+		Flt r2 = p->radius / 2.0;
+		Flt angle = 0.0f;
+		Flt inc = (PI * 2.0) / (Flt)p->nverts;
+		for (int i=0; i<p->nverts; i++) {
+			p->vert[i][0] = sin(angle) * (r2 + rnd() * p->radius);
+			p->vert[i][1] = cos(angle) * (r2 + rnd() * p->radius);
+			angle += inc;
+		}
+		p->pos[0] = 1500;
+		p->pos[1] = (Flt)(rand()%gl.yres);
+		p->pos[2] = 0.5f;
+		p->angle = 0.0;
+		p->rotate = 0.0;
+		p->color[0] = 0.6;
+		p->color[1] = 0.6;
+		p->color[2] = 0.6;
+		p->vel[0] = (Flt)(rnd()*2.0-1.0);
+		p->vel[1] = (Flt)(rnd()*2.0-1.0);
+		//std::cout << "asteroid" << std::endl;
+		//add to front of linked list
+		// p->next = ahead;
+		// if (ahead != NULL)
+		// 	ahead->prev = p;
+		next = p;
+		// ++nasteroids;
+		//----------------------------------------------------------------
 		clock_gettime(CLOCK_REALTIME, &bulletTimer);
 		nenemies = 0;
 		for (int k = 0; k < MAX_ENEMIES; k++) {
@@ -428,6 +481,7 @@ public:
 
 
 //function prototypes
+void renderPowerUps(PowerUp*);
 void renderTGIF (int, int);
 void raag_text(int, int);
 void renderDoneyTextCredits(int, int);
@@ -896,6 +950,9 @@ void physics()
 		//enemies[k].valid_enemy = 0;
 	}
 
+	//Update powerup position
+	g.next->pos[0] -= g.next->vel[0];
+
 	//Check for collision with window edges
 	if (g.ship.pos[0] < 0.0) {
 		g.ship.pos[0] += (float)gl.xres;
@@ -1292,10 +1349,6 @@ void render()
 		high_score(g.score);
 	}
 
-
-
-	//renderDoneyImage();
-
 	//-------------------------------------------------------------------------
 	//Draw the ship
 	glColor3fv(g.ship.color);
@@ -1380,7 +1433,6 @@ void render()
 			glColor3fv(a->color);
 			glPushMatrix();
 			glTranslatef(a->pos[0], a->pos[1], a->pos[2]);
-			glRotatef(a->angle, 0.0f, 0.0f, 1.0f);
 			glBegin(GL_LINE_LOOP);
 			//Log("%i verts\n",a->nverts);
 			for (int j=0; j<a->nverts; j++) {
@@ -1392,13 +1444,18 @@ void render()
 			//	glVertex2f(a->radius, 0);
 			//glEnd();
 			glPopMatrix();
-			glColor3f(1.0f, 0.0f, 0.0f);
+			glColor3f(0.0f, 0.0f, 1.0f);
 			glBegin(GL_POINTS);
 			glVertex2f(a->pos[0], a->pos[1]);
 			glEnd();
 			a = a->next;
 		}
 	}
+	//-------------------------------------------------------------------------
+	// Draw the PowerUps
+	renderPowerUps(g.next);
+	//-------------------------------------------------------------------------
+
 	//-------------------------------------------------------------------------
 	//Draw the bullets
 	for (int i=0; i<g.nbullets; i++) {

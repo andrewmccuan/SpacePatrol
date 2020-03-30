@@ -41,5 +41,19 @@ public:
 
 };
 
+class PowerUp {
+public:
+	Vec pos;
+	Vec vel;
+	int nverts;
+	Flt radius;
+	Vec vert[8];
+        float angle;
+	float rotate;
+	float color[3];
+	struct PowerUp *prev;
+	struct PowerUp *next;
+};
+
 
 #endif
