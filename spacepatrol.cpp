@@ -1380,7 +1380,7 @@ void render()
 		det_coll(gl.yres, gl.xres);
 	}
     
-	/*if (gl.tgif == 1) {
+	if (gl.tgif == 1) {
 		renderTGIF(gl.yres, gl.xres);
 		high_score(g.score);
 	}
