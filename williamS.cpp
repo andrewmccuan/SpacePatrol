@@ -529,74 +529,78 @@ void det_coll_player(int num_bullets, Ship *player,	Bullet *barr)
 }
 void creditBox(int yres, int xres, int bot)
 {
-        int x1 = xres/2 + 5;
-        int x2 = xres/2 - 160;
-        int y1 = 5;
-        int y2 = 160;
-        glColor3f(0.0, 1.0, 1.0);
-        glBegin(GL_QUADS);
-                glVertex2f((xres - x1), (yres - y1));
-                glVertex2f((xres - x2), (yres - y1));
-                glVertex2f((xres - x2), (yres - (y1 + 16)));
-                glVertex2f((xres - x1), (yres - (y1 + 16)));
-        glEnd();
-        glColor3f(1.0, 1.0, 1.0);
-        glBegin(GL_LINE_LOOP);
-                glVertex2f((xres - x1), (yres - y1));
-                glVertex2f((xres - x2), (yres - y1));
-                glVertex2f((xres - x2), (yres - y2));
-                glVertex2f((xres - x1), (yres - y2));
-        glEnd();
+	int x1 = xres/2 + 5;
+	int x2 = xres/2 - 160;
+	int y1 = 5;
+	int y2 = 160;
+	glColor3f(0.0, 1.0, 1.0);
+	glBegin(GL_QUADS);
+		glVertex2f((xres - x1), (yres - y1));
+		glVertex2f((xres - x2), (yres - y1));
+		glVertex2f((xres - x2), (yres - (y1 + 16)));
+		glVertex2f((xres - x1), (yres - (y1 + 16)));
+	glEnd();
+	glColor3f(1.0, 1.0, 1.0);
+	glBegin(GL_LINE_LOOP);
+		glVertex2f((xres - x1), (yres - y1));
+		glVertex2f((xres - x2), (yres - y1));
+		glVertex2f((xres - x2), (yres - y2));
+		glVertex2f((xres - x1), (yres - y2));
+	glEnd();
 
-        Rect r;
-        r.bot = bot;
-        r.bot = yres - 20;
-        //r.left = 10;
-        r.left = xres - xres/2; 
-        r.center = 0;
+	Rect r;
+	r.bot = bot;
+	r.bot = yres - 20;
+	//r.left = 10;
+	r.left = xres - xres/2; 
+	r.center = 0;
 	ggprint8b(&r, 16, 0x00000000, "Credits");
 }
 
 void hit_point_box(int yres, int xres, int bot)
 {
-        int x1 = xres/2 + 160;
-        int x2 = xres/2 - 160;
-        int y1 = yres - 60;
-        int y2 = yres - 5;
+	int x1 = xres/2 + 160;
+	int x2 = xres/2 - 160;
+	int y1 = yres - 60;
+	int y2 = yres - 5;
 	int hp_box_width = 80;
-        glColor3f(0.0, 1.0, 1.0);
-        glBegin(GL_QUADS);
-                glVertex2f((xres - x1), (yres - y1));
-                glVertex2f((xres - x2), (yres - y1));
-                glVertex2f((xres - x2), (yres - (y1 + 16)));
-                glVertex2f((xres - x1), (yres - (y1 + 16)));
-        glEnd();
-        glColor3f(1.0, 1.0, 1.0);
-        glBegin(GL_LINE_LOOP);
-                glVertex2f((xres - x1), (yres - y1));
-                glVertex2f((xres - x2), (yres - y1));
-                glVertex2f((xres - x2), (yres - y2));
-                glVertex2f((xres - x1), (yres - y2));
-        glEnd();
+	glColor3f(0.0, 1.0, 1.0);
+	glBegin(GL_QUADS);
+		glVertex2f((xres - x1), (yres - y1));
+		glVertex2f((xres - x2), (yres - y1));
+		glVertex2f((xres - x2), (yres - (y1 + 16)));
+		glVertex2f((xres - x1), (yres - (y1 + 16)));
+	glEnd();
+	glColor3f(1.0, 1.0, 1.0);
+	glBegin(GL_LINE_LOOP);
+		glVertex2f((xres - x1), (yres - y1));
+		glVertex2f((xres - x2), (yres - y1));
+		glVertex2f((xres - x2), (yres - y2));
+		glVertex2f((xres - x1), (yres - y2));
+	glEnd();
 	int up_cntr = 0;
 	int down_cntr = 3;
 	for (int i = 3; i >= 0; i--) {
 		glColor3f(1.0, 1.0, 1.0);
 		glBegin(GL_QUADS);
-               		glVertex2f((xres - x1 + 1 + up_cntr * hp_box_width), (yres - y1 - 17));
-                	glVertex2f((xres - x2 - 1 - down_cntr * hp_box_width), (yres - y1 - 17));
-                	glVertex2f((xres - x2 - 1 - down_cntr * hp_box_width), (yres - y2 + 1));
-                	glVertex2f((xres - x1 + 1 + up_cntr * hp_box_width), (yres - y2 + 1));
-        	glEnd();
+			glVertex2f((xres - x1 + 1 + up_cntr * hp_box_width), 
+				(yres - y1 - 17));
+			glVertex2f((xres - x2 - 1 - down_cntr * hp_box_width),
+				(yres - y1 - 17));
+			glVertex2f((xres - x2 - 1 - down_cntr * hp_box_width),
+				(yres - y2 + 1));
+			glVertex2f((xres - x1 + 1 + up_cntr * hp_box_width), 
+				(yres - y2 + 1));
+		glEnd();
 		up_cntr++;
 		down_cntr--;
 	}
 
-        Rect r;
-        r.bot = bot;
-        r.bot = 45;
-        //r.left = 10;
-        r.left = xres - xres/2 - 30; 
-        r.center = 0;
+	Rect r;
+	r.bot = bot;
+	r.bot = 45;
+	//r.left = 10;
+	r.left = xres - xres/2 - 30; 
+	r.center = 0;
 	ggprint8b(&r, 16, 0xffffffff, "Hit Points");
 }
