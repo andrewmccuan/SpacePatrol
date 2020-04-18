@@ -526,6 +526,8 @@ extern void show_cert_data(SSL *ssl, BIO *outbio, const char *hostname);
 extern BIO *ssl_setup_bio(void);
 int * high_score(int score);
 void det_coll_enemy(int *num_enemies, int num_bullets, Ship *enemies, Bullet *barr); 
+void creditBox(int yres, int xres, int bot);
+void hit_point_box(int yres, int xres, int bot);
 //==========================================================================
 // M A I N
 //==========================================================================
@@ -1351,13 +1353,15 @@ void render()
 	//	ggprint8b(&r, 16, 0x00ffff00, " MENU SHOULD BEEN SHOWN ");
 	//}
 
-
+	hit_point_box(gl.yres, gl.xres, r.bot);	
 	if (gl.credits == 1) {
-		renderDoneyImage(gl.creditTexture, gl.yres, gl.xres);
+		//renderDoneyImage(gl.creditTexture, gl.yres, gl.xres);
+		creditBox(gl.yres, gl.xres, r.bot);
 		andrew_credit_text(gl.yres, gl.xres);
 		renderDoneyTextCredits(gl.yres, gl.xres);
 		draw_will_text(gl.yres, gl.xres);
 		raag_text(gl.yres, gl.xres);
+		//creditBox(gl.yres, gl.xres, r.bot);
 	}
 	if (gl.highscore == 1) {
 		if (!gl.arr) {

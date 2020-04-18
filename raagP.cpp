@@ -34,7 +34,7 @@ void raag_text(int yres, int xres)
     //ggprint8b(&r,75, 0xFFFF3C, 
     //"Friday --> The quick brown fox jumps over the lazy dog --> Raag Patel ");
     ggprint8b(&r,75, 0x336600,
-    "Tuesday --> No lemon, no melon --> Raag Patel ");
+    "Raag Patel ");
 
 }
 
