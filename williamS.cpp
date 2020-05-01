@@ -445,7 +445,7 @@ void change_vel(Ship *my_enemy, int num_calls, int ship_quadrant)
 	pos_y = rand() % 2;
 
 	if (ship_quadrant > 0 && my_enemy->num_calls_vel == 1) {
-		std::cout << "In change V" << std::endl;
+		//std::cout << "In change V" << std::endl;
 		xvel = rand() % 5 + 1;
 		yvel = rand() % 5 + 1;
 		if (pos_x == 1) {
@@ -475,7 +475,7 @@ void det_coll_enemy(int *num_enemies, int num_bullets, Ship *enemies,
 				(((b[i].pos[1]) - (enemies[k].pos[1] - 30)) >= 0) &&
 				(((enemies[k].pos[1] + 30)) - b[i].pos[1] >= 0)) {
 					
-				std::cout << "Collision " <<  std::endl;
+				//std::cout << "Collision " <<  std::endl;
 				enemies[k].pos[1] = 40000;
 				enemies[k].pos[0] = 40000;
 
@@ -511,22 +511,26 @@ void new_ship_rightspawn(Ship *my_enemy, int countr, int yres, int xres) {
 	my_enemy->pos[2] = 0.0f;
 }
 
-void det_coll_player(int num_bullets, Ship *player,	Bullet *barr)
+void det_coll_player(int num_bullets, Ship *player, Bullet *barr)
 {
 	Bullet *b = barr;
 	for (int i = 0; i < num_bullets; i++) {
 		if ((((b[i].pos[0]) - (player->pos[0] - 30)) >= 0) &&
-				(((player->pos[0] + 30)) - b[i].pos[0] >= 0) &&  	
-				(((b[i].pos[1]) - (player->pos[1] - 30)) >= 0) &&
-				(((player->pos[1] + 30)) - b[i].pos[1] >= 0)) {
-					
-			std::cout << "Collision " <<  std::endl;
+			(((player->pos[0] + 30)) - b[i].pos[0] >= 0) &&  	
+			(((b[i].pos[1]) - (player->pos[1] - 30)) >= 0) &&
+			(((player->pos[1] + 30)) - b[i].pos[1] >= 0)) {
+			
+			if (player->hp > 0) {
+				player->hp = player->hp - .05;
+			}
+			//std::cout << "Player Collision " <<  std::endl;
 			// Collision detected
 			// Display explosion at position of ship if hp = 0
 			// Otherwise decrement hp
 		}
 	}
 }
+
 void creditBox(int yres, int xres, int bot)
 {
 	int x1 = xres/2 + 5;
@@ -557,7 +561,7 @@ void creditBox(int yres, int xres, int bot)
 	ggprint8b(&r, 16, 0x00000000, "Credits");
 }
 
-void hit_point_box(int yres, int xres, int bot)
+void hit_point_box(int yres, int xres, int bot, Ship player)
 {
 	int x1 = xres/2 + 160;
 	int x2 = xres/2 - 160;
@@ -580,7 +584,9 @@ void hit_point_box(int yres, int xres, int bot)
 	glEnd();
 	int up_cntr = 0;
 	int down_cntr = 3;
-	for (int i = 3; i >= 0; i--) {
+	//
+	//std::cout << player.hp <<  std::endl;
+	for (int i = (int)player.hp; i >= 0; i--) {
 		glColor3f(1.0, 1.0, 1.0);
 		glBegin(GL_QUADS);
 			glVertex2f((xres - x1 + 1 + up_cntr * hp_box_width), 

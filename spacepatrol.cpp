@@ -181,6 +181,7 @@ public:
 	int rotated;
 	int first_call;
 	int num_calls_vel;
+	float hp;
 public:
 	Ship() {
 		VecZero(dir);
@@ -197,6 +198,7 @@ public:
 		quadrant[1] = 0;
 		rotated = 0;
 		num_calls_vel = 1;
+		hp = 3.0;
 	}
 };
 
@@ -527,7 +529,8 @@ extern BIO *ssl_setup_bio(void);
 int * high_score(int score);
 void det_coll_enemy(int *num_enemies, int num_bullets, Ship *enemies, Bullet *barr); 
 void creditBox(int yres, int xres, int bot);
-void hit_point_box(int yres, int xres, int bot);
+void hit_point_box(int yres, int xres, int bot, Ship player);
+void det_coll_player(int, Ship *, Bullet *);
 //==========================================================================
 // M A I N
 //==========================================================================
@@ -1208,7 +1211,8 @@ void physics()
 	}
 
 	int quadrant = 0;
-	det_coll_enemy(&g.nenemies, g.nbullets, g.enemies, g.barr); 
+	det_coll_enemy(&g.nenemies, g.nbullets, g.enemies, g.barr);
+	det_coll_player(g.ebullets, &g.ship, g.ebarr);  	
 	for (int k = 0; k < g.nenemies; k++) {
 		//std::cout << "Enemy " << k  << " Pos: " << g.enemies[k].pos[0] << " " << g.enemies[k].pos[1] << std::endl;
 		g.enemies[k].pos[0] += g.enemies[k].vel[0];
@@ -1353,7 +1357,7 @@ void render()
 	//	ggprint8b(&r, 16, 0x00ffff00, " MENU SHOULD BEEN SHOWN ");
 	//}
 
-	hit_point_box(gl.yres, gl.xres, r.bot);	
+	hit_point_box(gl.yres, gl.xres, r.bot, g.ship);	
 	if (gl.credits == 1) {
 		//renderDoneyImage(gl.creditTexture, gl.yres, gl.xres);
 		creditBox(gl.yres, gl.xres, r.bot);
