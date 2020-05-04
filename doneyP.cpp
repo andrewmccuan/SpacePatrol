@@ -97,7 +97,7 @@ PowerUp* buildPowerUp(PowerUp *p, int yres, float random, float PI)
 		angle += inc;
 	}
 	p->pos[0] = 1500;
-	p->pos[1] = (Flt)(rand()-20 % yres);
+	p->pos[1] = (Flt)(rand() % yres);
 	p->pos[2] = 0.5f;
 	p->angle = 0.0;
 	p->rotate = 0.0;
@@ -131,6 +131,27 @@ void updatePowerUpPosition (PowerUp *p, int yres, int xres)
 		p = p->next;
 	}
 }
+void renderPowerUpImage(GLuint texture, float* pos)
+{
+	glColor3f(1.0,1.0,1.0);
+	int width = 20;
+	glPushMatrix();
+	glTranslatef(pos[0], pos[1], pos[2]);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GREATER, 0.0f);
+	glColor4ub(255,255,255,255);
+    glBegin(GL_QUADS);
+    	glTexCoord2f(0.0f, 1.0f); glVertex2i(-width,-width);
+    	glTexCoord2f(0.0f, 0.0f); glVertex2i(-width, width);
+    	glTexCoord2f(1.0f, 0.0f); glVertex2i(width, width);
+    	glTexCoord2f(1.0f, 1.0f); glVertex2i(width,-width);
+    glEnd();
+	glDisable(GL_ALPHA_TEST);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glPopMatrix();
+}
+
 
 
 

@@ -124,7 +124,7 @@ Image::Image(const char *fname) {
 		unlink(ppmname);
 }
 Image doneyImg = "./images/doneyImage.jpg";
-Image img[13] = { 
+Image img[14] = { 
 "./images/sp_background_seamless.jpg",
 "./images/sp_ship.jpg",
 "./images/sp_enemy1.jpg",
@@ -137,9 +137,8 @@ Image img[13] = {
 "./images/sp_exit.jpg",
 "./images/sp_credits_page.jpg",
 "./images/sp_highscore_page.jpg",
-"./images/sp_menu_button.jpg"
-
-
+"./images/sp_menu_button.jpg",
+"./images/powerup.png"
 };
 
 //--- From "background" framework ---
@@ -183,6 +182,7 @@ public:
 	GLuint menuCreditsPage;
 	GLuint menuHighscorePage;
 	GLuint menuButton;
+	GLuint powerUp;
 	Texture tex; //From "brackground" framework
 	Global() {
 		xres = 1250;
@@ -503,6 +503,8 @@ public:
 
 
 //function prototypes
+void setupGame();
+void renderPowerUpImage(GLuint, float*);
 void updatePowerUpPosition (PowerUp*, int, int);
 void renderPowerUps(PowerUp*);
 void renderTGIF (int, int);
@@ -511,7 +513,9 @@ void raag_text(int, int);
 void renderDoneyTextCredits(int, int);
 void draw_will_text(int, int);
 void andrew_credit_text(int, int);
+int andrewButtonAction(int mouseX, int mouseY, int screen, int xres);
 void andrewBackImg(GLuint texture, int xres, int yres, float xc[], float yc[]);
+void andrewDrawMouse(int mouseX, int mouseY);
 void andrewDrawShip(GLuint texture, float* pos);
 void andrewDrawEnemy(GLuint texture, float* pos);
 void andrewBackImgMove(float* xc);
@@ -520,6 +524,9 @@ void andrewHighscoreBox(int, int, int, int* arr);
 void andrewShowCredits(GLuint texture1, GLuint texture2, int xres, int yres);
 void andrewShowHighscore(GLuint texture1, GLuint texture2, int xres, int yres);
 void andrewShowMenu(GLuint texture1, GLuint texture2, int xres, int yres);
+void andrewShowButtons(GLuint tex1, GLuint tex2, GLuint tex3, GLuint tex4,
+ 		GLuint tex5, int xres, int yres);
+void andrewButtonHighlight(int mouseX, int mouseY, int screen, int xres);
 void renderDoneyImage(GLuint, int, int);
 void genAndBindDoneyImage();
 void enemy_bullets();
@@ -679,6 +686,7 @@ void init_opengl(void)
 	glGenTextures(1, &gl.menuCreditsPage);
 	glGenTextures(1, &gl.menuHighscorePage);
 	glGenTextures(1, &gl.menuButton);
+	glGenTextures(1, &gl.powerUp);
 	
 
 	// Render Doney's Image
@@ -882,6 +890,20 @@ void init_opengl(void)
 	//
 	silhouetteData = buildAlphaData(&img[12]);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w12, h12, 0,
+							GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
+	free(silhouetteData);
+	//----
+	//------------------------------------------------------------------
+	// Power Up Image
+	int w13 = img[13].width;
+	int h13 = img[13].height;
+	glBindTexture(GL_TEXTURE_2D, gl.powerUp);
+	//
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	//
+	silhouetteData = buildAlphaData(&img[13]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w13, h13, 0,
 							GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
 	free(silhouetteData);
 	//----
@@ -1727,8 +1749,8 @@ void render()
 	//-------------------------------------------------------------------------
 	// Draw the PowerUps
 	renderPowerUps(g.next);
+	renderPowerUpImage(gl.powerUp, (float*)g.next->pos);
 	//-------------------------------------------------------------------------
-
 	//-------------------------------------------------------------------------
 	//Draw the bullets
 	for (int i=0; i<g.nbullets; i++) {
