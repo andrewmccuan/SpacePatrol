@@ -74,6 +74,7 @@ extern void timeCopy(struct timespec *dest, struct timespec *source);
 
 //-----------------------------------------------------------------------------
 
+
 Image:: ~Image() { delete [] data; }
 Image::Image(const char *fname) {
 	if (fname[0] == '\0')
@@ -250,6 +251,13 @@ public:
 	}
 };
 
+//-----------------------------------------------------------------------------
+//Function prototypes requiured in the game class.
+
+PowerUp* buildPowerUp(PowerUp*, int, float, float);
+
+//-----------------------------------------------------------------------------
+
 class Game {
 public:
 	Ship ship;
@@ -283,7 +291,7 @@ public:
 		mouseThrustOn = false;
 		num_calls_vel = 0;
 		//build 10 asteroids...
-		for (int j=0; j<10; j++) {
+		for (int j=0; j<5; j++) {
 			Asteroid *a = new Asteroid;
 			a->nverts = 8;
 			a->radius = rnd()*80.0 + 40.0;
@@ -317,34 +325,9 @@ public:
 		//----------------------------------------------------------------
 		//Draw a single PowerUp
 		PowerUp *p = new PowerUp;
-		p->nverts = 4;
-		p->radius = 40.0/2;
-		Flt r2 = p->radius / 2.0;
-		Flt angle = 0.0f;
-		Flt inc = (PI * 2.0) / (Flt)p->nverts;
-		for (int i=0; i<p->nverts; i++) {
-			p->vert[i][0] = sin(angle) * (r2 + rnd() * p->radius);
-			p->vert[i][1] = cos(angle) * (r2 + rnd() * p->radius);
-			angle += inc;
-		}
-		p->pos[0] = 1500;
-		p->pos[1] = (Flt)(rand()%gl.yres);
-		p->pos[2] = 0.5f;
-		p->angle = 0.0;
-		p->rotate = 0.0;
-		p->color[0] = 0.6;
-		p->color[1] = 0.6;
-		p->color[2] = 0.6;
-		p->vel[0] = (Flt)(rnd()*2.0-1.0);
-		p->vel[1] = (Flt)(rnd()*2.0-1.0);
-		//std::cout << "asteroid" << std::endl;
-		//add to front of linked list
-		// p->next = ahead;
-		// if (ahead != NULL)
-		// 	ahead->prev = p;
-		next = p;
-		// ++nasteroids;
+		next = buildPowerUp(p, gl.yres, rnd(), PI);
 		//----------------------------------------------------------------
+
 		clock_gettime(CLOCK_REALTIME, &bulletTimer);
 		nenemies = 0;
 		for (int k = 0; k < MAX_ENEMIES; k++) {
@@ -493,6 +476,7 @@ public:
 
 
 //function prototypes
+void updatePowerUpPosition (PowerUp*, int, int);
 void renderPowerUps(PowerUp*);
 void renderTGIF (int, int);
 int circ_mov (Ship *my_enemy);
@@ -507,7 +491,6 @@ void andrewBackImgMove(float* xc);
 void andrewHelpMenu(int, int, int);
 void andrewHighscoreBox(int, int, int, int* arr);
 void andrewShowMenu(GLuint texture1, GLuint texture2, int xres, int yres);
-//void genAndBindDoneyImage();
 void renderDoneyImage(GLuint, int, int);
 void genAndBindDoneyImage();
 void enemy_bullets();
@@ -1039,6 +1022,10 @@ void physics()
 		}
 		i++;
 	}
+	//
+	//Update powerup positions
+	updatePowerUpPosition (g.next, gl.yres, gl.xres);
+
 
 	//
 	//Update asteroid positions

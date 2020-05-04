@@ -7,6 +7,8 @@
 #include "fonts.h"
 #include "image.h"
 #include "asteroid.h"
+#include <stdlib.h>
+#include <cmath>
 #include <openssl/crypto.h>
 #include <openssl/x509.h>
 #include <openssl/pem.h>
@@ -32,8 +34,6 @@ void renderTGIF (int yres, int xres)
     r.center = 0;
     ggprint8b(&r, 75, 0x8926DD, "TGIF - Thank God Its Friday");
 }
-
-//Image doneyImg = "./images/doneyImg.png";
 
 void renderDoneyImage(GLuint texture, int yres, int xres)
 {
@@ -84,37 +84,53 @@ void renderPowerUps(PowerUp *ahead)
 	}
 }
 
-/*
-
-void buildPowerUp()
+PowerUp* buildPowerUp(PowerUp *p, int yres, float random, float PI)
 {
-    PowerUp *p = new PowerUp;
-	p->nverts = 8;
-	p->radius = rnd()*80.0 + 40.0;
+	p->nverts = 4;
+	p->radius = 40.0/2;
 	Flt r2 = p->radius / 2.0;
 	Flt angle = 0.0f;
 	Flt inc = (PI * 2.0) / (Flt)p->nverts;
-	for (int i=0; i<a->nverts; i++) {
-		p->vert[i][0] = sin(angle) * (r2 + rnd() * p->radius);
-		p->vert[i][1] = cos(angle) * (r2 + rnd() * p->radius);
+	for (int i=0; i<p->nverts; i++) {
+		p->vert[i][0] = sin(angle) * (r2 + random * p->radius);
+		p->vert[i][1] = cos(angle) * (r2 + random * p->radius);
 		angle += inc;
 	}
-	p->pos[0] = (Flt)(rand() % gl.xres);
-	p->pos[1] = (Flt)(rand() % gl.yres);
-	p->pos[2] = 0.0f;
+	p->pos[0] = 1500;
+	p->pos[1] = (Flt)(rand()-20 % yres);
+	p->pos[2] = 0.5f;
 	p->angle = 0.0;
-	p->rotate = rnd() * 4.0 - 2.0;
-	p->color[0] = 0.8;
-	p->color[1] = 0.8;
-	p->color[2] = 0.7;
-	p->vel[0] = (Flt)(rnd()*2.0-1.0);
-	p->vel[1] = (Flt)(rnd()*2.0-1.0);
-	//std::cout << "asteroid" << std::endl;
-	//add to front of linked list
-	p->next = ahead;
-	if (ahead != NULL)
-		ahead->prev = a;
-	ahead = a;
-	++nasteroids;
+	p->rotate = 0.0;
+	p->color[0] = 0.6;
+	p->color[1] = 0.6;
+	p->color[2] = 0.6;
+	p->vel[0] = (Flt)(random *  2.0 - 1.0);
+	p->vel[1] = (Flt)(random * 2.0 - 1.0);
+
+	return p;
 }
-*/
+
+void updatePowerUpPosition (PowerUp *p, int yres, int xres)
+{
+	while (p) {
+		p->pos[0] -= p->vel[0];
+		//p->pos[1] -= p->vel[1];
+		//Check for collision with window edges
+		if (p->pos[0] < -100.0) {
+			p->pos[0] += (float)xres+200;
+		}
+		else if (p->pos[0] > (float)xres+100) {
+			p->pos[0] -= (float)xres+200;
+		}
+		else if (p->pos[1] < -100.0) {
+			p->pos[1] += (float)yres+200;
+		}
+		else if (p->pos[1] > (float)yres+100) {
+			p->pos[1] -= (float)yres+200;
+		}
+		p = p->next;
+	}
+}
+
+
+

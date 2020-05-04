@@ -23,15 +23,15 @@ public:
 
 class Ship {
 public:
-        Vec dir;
-        Vec pos;
-        Vec vel;
+    Vec dir;
+    Vec pos;
+    Vec vel;
 	Vec save_vel;
 	int quadrant[2];
-        float angle;
-        float color[3];
-        bool valid_enemy; 
-        int numbullets;	
+    float angle;
+    float color[3];
+    bool valid_enemy; 
+    int numbullets;	
 	int rotated;
 	int first_call;
 	int num_calls_vel;
@@ -39,10 +39,10 @@ public:
 
 class Bullet {
 public:
-        Vec pos;
-        Vec vel;
-        float color[3];
-        struct timespec time;
+    Vec pos;
+    Vec vel;
+    float color[3];
+    struct timespec time;
 
 };
 
@@ -53,11 +53,16 @@ public:
 	int nverts;
 	Flt radius;
 	Vec vert[8];
-        float angle;
+    float angle;
 	float rotate;
 	float color[3];
 	struct PowerUp *prev;
 	struct PowerUp *next;
+	public:
+	PowerUp() {
+		prev = NULL;
+		next = NULL;
+	}
 };
 
 
