@@ -123,12 +123,22 @@ Image::Image(const char *fname) {
 		unlink(ppmname);
 }
 Image doneyImg = "./images/doneyImage.jpg";
-Image img[5] = { 
+Image img[13] = { 
 "./images/sp_background_seamless.jpg",
 "./images/sp_ship.jpg",
 "./images/sp_enemy1.jpg",
 "./images/sp_menu.jpg",
-"./images/sp_menuGalaxy2.jpg"
+"./images/sp_menuGalaxy.jpg",
+"./images/sp_play.jpg",
+"./images/sp_highscores.jpg",
+"./images/sp_credits.jpg",
+"./images/sp_logo.jpg",
+"./images/sp_exit.jpg",
+"./images/sp_credits_page.jpg",
+"./images/sp_highscore_page.jpg",
+"./images/sp_menu_button.jpg"
+
+
 };
 
 //--- From "background" framework ---
@@ -143,7 +153,9 @@ public:
 
 class Global {
 public:
-	int show_menu = 0; 
+	int show_menu = 1; 
+	int show_credits = 0;
+	int show_highscore = 0;
 	int credits = 0;
 	int collision_det = 0;
 	int tgif = 0;
@@ -151,6 +163,10 @@ public:
 	int save_score;
 	int help = 0;
 	int xres, yres;
+	int mx, my;
+	int closeGame = 0;
+	int gamestate[4];
+	//int gamestate[4] = {show_menu, highscore, credits, closeGame};
 	int *arr;
 	char keys[65536];
 	GLuint shipTexture;
@@ -158,11 +174,20 @@ public:
 	GLuint creditTexture;
 	GLuint menuTexture;
 	GLuint menuGalTexture;
+	GLuint menuPlay;
+	GLuint menuHighscores;
+	GLuint menuCredits;
+	GLuint menuLogo;
+	GLuint menuExit;
+	GLuint menuCreditsPage;
+	GLuint menuHighscorePage;
+	GLuint menuButton;
 	Texture tex; //From "brackground" framework
 	Global() {
 		xres = 1250;
 		yres = 900;
 		memset(keys, 0, 65536);
+		//gamestate = {show_menu, highscore, credits, closeGame};
 		arr = 0;
 	}
 } gl;
@@ -508,7 +533,17 @@ void andrewDrawEnemy(GLuint texture, float* pos);
 void andrewBackImgMove(float* xc);
 void andrewHelpMenu(int, int, int);
 void andrewHighscoreBox(int, int, int, int* arr);
+void andrewShowCredits(GLuint texture1, GLuint texture2, int xres, int yres);
+void andrewShowHighscore(GLuint texture1, GLuint texture2, int xres, int yres);
 void andrewShowMenu(GLuint texture1, GLuint texture2, int xres, int yres);
+void andrewShowButtons(GLuint tex1, GLuint tex2, GLuint tex3, GLuint tex4, 
+		GLuint tex5, int xres, int yres);
+void andrewDrawMouse(int mouseX, int mouseY);
+void andrewButtonHighlight(int mouseX, int mouseY, int xres);
+int andrewButtonAction(int mouseX, int mouseY, int screen,
+		int xres);
+void closeTheGame();
+void setupGame();
 //void genAndBindDoneyImage();
 void renderDoneyImage(GLuint, int, int);
 void genAndBindDoneyImage();
@@ -531,6 +566,12 @@ void det_coll_enemy(int *num_enemies, int num_bullets, Ship *enemies, Bullet *ba
 void creditBox(int yres, int xres, int bot);
 void hit_point_box(int yres, int xres, int bot, Ship player);
 void det_coll_player(int, Ship *, Bullet *);
+
+void closeTheGame()
+{
+	gl.closeGame = 1;
+}
+
 //==========================================================================
 // M A I N
 //==========================================================================
@@ -538,6 +579,7 @@ int main()
 {
 	logOpen();
 	init_opengl();
+	setupGame();
 	srand(time(NULL));
 	clock_gettime(CLOCK_REALTIME, &timePause);
 	clock_gettime(CLOCK_REALTIME, &timeStart);
@@ -549,6 +591,9 @@ int main()
 			x11.check_resize(&e);
 			check_mouse(&e);
 			done = check_keys(&e);
+			if (gl.closeGame == 1) {
+				done = gl.closeGame;
+			}
 		}
 		clock_gettime(CLOCK_REALTIME, &timeCurrent);
 		timeSpan = timeDiff(&timeStart, &timeCurrent);
@@ -565,6 +610,22 @@ int main()
 	cleanup_fonts();
 	logClose();
 	return 0;
+}
+
+void setupGame()
+{
+	gl.gamestate[0] = gl.show_menu;
+	gl.gamestate[1] = gl.show_highscore;
+	gl.gamestate[2] = gl.show_credits;
+	gl.gamestate[3] = gl.closeGame;
+
+	//Come Back to later
+	//possible seg fault
+	/*
+	gl.arr = high_score(g.score);
+	std::cout << "Contacted server" << std::endl;
+	std::cout << *(gl.arr) << std::endl;
+	*/
 }
 
 //===============================================
@@ -634,7 +695,16 @@ void init_opengl(void)
 	glGenTextures(1, &gl.shipTexture);
 	glGenTextures(1, &gl.enemy1Texture);
 	glGenTextures(1, &gl.menuTexture);
+	glGenTextures(1, &gl.menuLogo);
 	glGenTextures(1, &gl.menuGalTexture);
+	glGenTextures(1, &gl.menuPlay);
+	glGenTextures(1, &gl.menuHighscores);
+	glGenTextures(1, &gl.menuCredits);
+	glGenTextures(1, &gl.menuExit);
+	glGenTextures(1, &gl.menuCreditsPage);
+	glGenTextures(1, &gl.menuHighscorePage);
+	glGenTextures(1, &gl.menuButton);
+	
 
 	// Render Doney's Image
 	//------------------------------------------------------------------
@@ -697,17 +767,15 @@ void init_opengl(void)
 	int w3 = img[3].width;
 	int h3 = img[3].height;
 	glBindTexture(GL_TEXTURE_2D, gl.menuTexture);
+	//
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, 3, w3, h3, 0,
-	GL_RGB, GL_UNSIGNED_BYTE, img[3].data);
+	//
+	silhouetteData = buildAlphaData(&img[3]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w3, h3, 0,
+							GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
+	free(silhouetteData);
 
-	glBindTexture(GL_TEXTURE_2D, gl.creditTexture);
-
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
-			GL_RGB, GL_UNSIGNED_BYTE, doneyImg.data);
 	//
 	//*/
 	//------------------------------------------------------------------
@@ -726,6 +794,122 @@ void init_opengl(void)
 							GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
 	free(silhouetteData);
 	//*/
+	//------------------------------------------------------------------
+	// Play Button Image
+	//*
+	int w5 = img[5].width;
+	int h5 = img[5].height;
+	glBindTexture(GL_TEXTURE_2D, gl.menuPlay);
+	//
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	//
+	silhouetteData = buildAlphaData(&img[5]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w5, h5, 0,
+							GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
+	free(silhouetteData);
+	//*/
+	//------------------------------------------------------------------
+	// High Score Button Image
+	//*
+	int w6 = img[6].width;
+	int h6 = img[6].height;
+	glBindTexture(GL_TEXTURE_2D, gl.menuHighscores);
+	//
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	//
+	silhouetteData = buildAlphaData(&img[6]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w6, h6, 0,
+							GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
+	free(silhouetteData);
+	//*/
+	//------------------------------------------------------------------
+	// Credits Button Image
+	//*
+	int w7 = img[7].width;
+	int h7 = img[7].height;
+	glBindTexture(GL_TEXTURE_2D, gl.menuCredits);
+	//
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	//
+	silhouetteData = buildAlphaData(&img[7]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w7, h7, 0,
+							GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
+	free(silhouetteData);
+	//*/
+	//*/
+	//------------------------------------------------------------------
+	// Logo Image
+	//*
+	int w8 = img[8].width;
+	int h8 = img[8].height;
+	glBindTexture(GL_TEXTURE_2D, gl.menuLogo);
+	//
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	//
+	silhouetteData = buildAlphaData(&img[8]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w8, h8, 0,
+							GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
+	free(silhouetteData);
+	//*/
+	//------------------------------------------------------------------
+	// Exit Button Image
+	//*
+	int w9 = img[9].width;
+	int h9 = img[9].height;
+	glBindTexture(GL_TEXTURE_2D, gl.menuExit);
+	//
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	//
+	silhouetteData = buildAlphaData(&img[9]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w9, h9, 0,
+							GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
+	free(silhouetteData);
+	//*/
+	//------------------------------------------------------------------
+	// Credits Page Image
+	int w10 = img[10].width;
+	int h10 = img[10].height;
+	glBindTexture(GL_TEXTURE_2D, gl.menuCreditsPage);
+	//
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	//
+	silhouetteData = buildAlphaData(&img[10]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w10, h10, 0,
+							GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
+	free(silhouetteData);
+	//------------------------------------------------------------------
+	// Highscore Page Image
+	int w11 = img[11].width;
+	int h11 = img[11].height;
+	glBindTexture(GL_TEXTURE_2D, gl.menuHighscorePage);
+	//
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	//
+	silhouetteData = buildAlphaData(&img[11]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w11, h11, 0,
+							GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
+	free(silhouetteData);
+	//------------------------------------------------------------------
+	// Back Button Image
+	int w12 = img[12].width;
+	int h12 = img[12].height;
+	glBindTexture(GL_TEXTURE_2D, gl.menuButton);
+	//
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	//
+	silhouetteData = buildAlphaData(&img[12]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w12, h12, 0,
+							GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
+	free(silhouetteData);
+	//----
 }
 
 void normalize2d(Vec v)
@@ -745,16 +929,74 @@ void check_mouse(XEvent *e)
 {
 	//Did the mouse move?
 	//Was a mouse button clicked?
-	static int savex = 0;
-	static int savey = 0;
+	static int savex = gl.xres/2;
+	static int savey = gl.yres/2;
+	gl.mx = savex;
+	gl.my = savey;
 	//
-	static int ct=0;
+	//static int ct=0;
+
+	gl.mx = e->xbutton.x;
+	gl.my = e->xbutton.y;
+
 	//std::cout << "m" << std::endl << std::flush;
 	if (e->type == ButtonRelease) {
 		return;
 	}
 	if (e->type == ButtonPress) {
 		if (e->xbutton.button==1) {
+
+			if (gl.show_menu == 1) {
+				int screen = 1;
+				int num = andrewButtonAction(gl.mx, (gl.yres - gl.my), screen,
+							gl.xres);
+				if (num == 1) {
+					gl.show_menu = 0;
+					gl.gamestate[0] = gl.show_menu;
+				}
+				if (num == 2) {
+					gl.show_menu = 0;
+					gl.gamestate[0] = gl.show_menu;
+					gl.show_highscore = 1;
+					gl.gamestate[1] = gl.show_highscore;
+				}
+				if (num == 3) {
+					gl.show_menu = 0;
+					gl.gamestate[0] = gl.show_menu;
+					gl.show_credits = 1;
+					gl.gamestate[2] = gl.show_credits;
+				}
+				if (num == 4) {
+					gl.show_menu = 0;
+					gl.gamestate[0] = gl.show_menu;
+					gl.closeGame = 1;
+					gl.gamestate[3] = gl.closeGame;
+				}
+			}
+			//*
+			if (gl.show_highscore == 1) {
+				int screen = 2;
+				int num = andrewButtonAction(gl.mx, (gl.yres - gl.my), screen,
+							gl.xres);
+				if (num == 1) {
+					gl.show_menu = 1;
+					gl.gamestate[0] = gl.show_menu;
+					gl.show_highscore = 0;
+					gl.gamestate[1] = gl.show_highscore;
+				}
+			}
+			if (gl.show_credits == 1) {
+				int screen = 2;
+				int num = andrewButtonAction(gl.mx, (gl.yres - gl.my), screen,
+							gl.xres);
+				if (num == 1) {
+					gl.show_menu = 1;
+					gl.gamestate[0] = gl.show_menu;
+					gl.show_credits = 0;
+					gl.gamestate[1] = gl.show_credits;
+				}
+			}
+			//*/
 			//Left button is down
 			//a little time between each bullet
 			struct timespec bt;
@@ -792,10 +1034,13 @@ void check_mouse(XEvent *e)
 		}
 	}
 	//keys[XK_Up] = 0;
+	/*
 	if (savex != e->xbutton.x || savey != e->xbutton.y) {
 		//Mouse moved
 		int xdiff = savex - e->xbutton.x;
 		int ydiff = savey - e->xbutton.y;
+		//gl.mx = xdiff;
+		//gl.my = ydiff;
 		if (++ct < 10)
 			return;		
 		//std::cout << "savex: " << savex << std::endl << std::flush;
@@ -833,10 +1078,13 @@ void check_mouse(XEvent *e)
 			g.mouseThrustOn = true;
 			clock_gettime(CLOCK_REALTIME, &g.mouseThrustTimer);
 		}
-		x11.set_mouse_position(100,100);
-		savex=100;
-		savey=100;
+		if (gl.show_menu == 0) {
+			x11.set_mouse_position(100,100);
+			savex=100;
+			savey=100;
+		}
 	}
+	*/
 }
 
 int check_keys(XEvent *e)
@@ -892,6 +1140,7 @@ int check_keys(XEvent *e)
 			break;
 		case XK_m:
 			gl.show_menu = gl.show_menu ^ 1;
+			gl.gamestate[0] = gl.show_menu;
 	}
 	return 0;
 }
@@ -1543,6 +1792,22 @@ void render()
 
 	if (gl.show_menu == 1) {
 		andrewShowMenu(gl.menuTexture, gl.menuGalTexture, gl.xres, gl.yres);
+		andrewShowButtons(gl.menuLogo, gl.menuPlay, gl.menuHighscores,
+			gl.menuCredits, gl.menuExit, gl.xres, gl.yres);
+		andrewButtonHighlight(gl.mx, (gl.yres - gl.my), gl.xres);
+		andrewDrawMouse(gl.mx, (gl.yres - gl.my));
+	}
+	if (gl.show_credits == 1) {
+		andrewShowCredits(gl.menuCreditsPage, gl.menuButton, gl.xres, gl.yres);
+	}
+	if (gl.show_highscore == 1) {
+		andrewShowHighscore(gl.menuHighscorePage, gl.menuButton, gl.xres, gl.yres);
+		if (!gl.arr) {
+			int arrTest[] = {1, 2, 3, 4, 5};
+			andrewHighscoreBox(gl.yres, gl.xres, g.score, arrTest);
+		} else {
+			andrewHighscoreBox(gl.yres, gl.xres, g.score, gl.arr);
+		}
 	}
 
 }

@@ -16,42 +16,88 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-/*
-Image andrewImg = "./images/andrewImg.png";
+#define BUTTON_WIDTH 100
+#define BUTTON_HEIGHT 100
+#define BUTTON_BACK 50
 
-GLuint andrewCreditTex;
+static int ylocation = 0;
 
-void andrew_generateCreditTex()
+void closeTheGame();
+
+void andrewShowCredits(GLuint texture1, GLuint texture2, int xres, int yres)
 {
-	glGenTextures(1, &andrewCreditTex;
-	int w = andrewImg.width;
-	int h = andrewImg.height;
-	//int w = pic.width;
-	//int h = pic.height;
-	//
-	glBindTexture(GL_TEXTURE_2D, andrewCreditTex);
-	//
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
-		GL_RGB, GL_UNSIGNED_BYTE, andrewImg.data); //pic.data
-}
-*/
-
-/*
-void andrew_creditPic() 
-{
-    glColor3ub(255, 255, 255);
-	glBindTexture(GL_TEXTURE_2D, andrewCreditTex);
-	glBegin(GL_QUADS);
-		glTexCoord2f(0.0f, 0.0f); glVertex2f(400.0f, 400.0f);
-		glTexCoord2f(1.0f, 0.0f); glVertex2f(500.0f, 400.0f);
-		glTexCoord2f(1.0f, 1.0f); glVertex2f(500.0f, 300.0f);
-		glTexCoord2f(0.0f, 1.0f); glVertex2f(400.0f, 300.0f);
-	glEnd();
+	glColor3f(1.0,1.0,1.0);
+	glPushMatrix();
+	glBindTexture(GL_TEXTURE_2D, texture1);
+    glBegin(GL_QUADS);
+    	glTexCoord2f(0.0f, 1.0f); glVertex2i(0, 0);
+   		glTexCoord2f(0.0f, 0.0f); glVertex2i(0, yres);
+    	glTexCoord2f(1.0f, 0.0f); glVertex2i(xres, yres);
+    	glTexCoord2f(1.0f, 1.0f); glVertex2i(xres, 0);
+    glEnd();
 	glBindTexture(GL_TEXTURE_2D, 0);
+	glPopMatrix();
+
+	//Back Button
+	glColor3f(1.0, 1.0, 0.0);
+	glPushMatrix();
+	glBindTexture(GL_TEXTURE_2D, texture2);
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GREATER, 0.0f);
+	glColor4ub(255,255,255,255);
+	glBegin(GL_QUADS);
+		glTexCoord2f(0.0f, 1.0f); 
+		glVertex2i(BUTTON_BACK, BUTTON_BACK);
+		glTexCoord2f(0.0f, 0.0f); 
+		glVertex2i(BUTTON_BACK, BUTTON_BACK + BUTTON_HEIGHT);
+		glTexCoord2f(1.0f, 0.0f); 
+		glVertex2i(BUTTON_BACK + (BUTTON_WIDTH * 2),
+				BUTTON_BACK + BUTTON_HEIGHT);
+		glTexCoord2f(1.0f, 1.0f); 
+		glVertex2i(BUTTON_BACK + (BUTTON_WIDTH * 2), BUTTON_BACK);
+	glEnd();
+	glDisable(GL_ALPHA_TEST);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glPopMatrix();
 }
-*/
+
+void andrewShowHighscore(GLuint texture1, GLuint texture2, int xres, int yres)
+{
+	//Background Image
+	glColor3f(1.0,1.0,1.0);
+	glPushMatrix();
+	glBindTexture(GL_TEXTURE_2D, texture1);
+    glBegin(GL_QUADS);
+    	glTexCoord2f(0.0f, 1.0f); glVertex2i(0, 0);
+   		glTexCoord2f(0.0f, 0.0f); glVertex2i(0, yres);
+    	glTexCoord2f(1.0f, 0.0f); glVertex2i(xres, yres);
+    	glTexCoord2f(1.0f, 1.0f); glVertex2i(xres, 0);
+    glEnd();
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glPopMatrix();
+
+	//Back Button
+	glColor3f(1.0, 1.0, 0.0);
+	glPushMatrix();
+	glBindTexture(GL_TEXTURE_2D, texture2);
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GREATER, 0.0f);
+	glColor4ub(255,255,255,255);
+	glBegin(GL_QUADS);
+		glTexCoord2f(0.0f, 1.0f); 
+		glVertex2i(BUTTON_BACK, BUTTON_BACK);
+		glTexCoord2f(0.0f, 0.0f); 
+		glVertex2i(BUTTON_BACK, BUTTON_BACK + BUTTON_HEIGHT);
+		glTexCoord2f(1.0f, 0.0f); 
+		glVertex2i(BUTTON_BACK + (BUTTON_WIDTH * 2),
+				BUTTON_BACK + BUTTON_HEIGHT);
+		glTexCoord2f(1.0f, 1.0f); 
+		glVertex2i(BUTTON_BACK + (BUTTON_WIDTH * 2), BUTTON_BACK);
+	glEnd();
+	glDisable(GL_ALPHA_TEST);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glPopMatrix();
+}
 
 void show_cert_data(SSL *ssl, BIO *outbio, const char *hostname) 
 {
@@ -79,6 +125,31 @@ void show_cert_data(SSL *ssl, BIO *outbio, const char *hostname)
 	printf("--------------------------------------------------------------\n");
 }
 
+void andrewDrawMouse(int mouseX, int mouseY)
+{
+	glColor3f(0.0, 1.0, 0.0);
+		glPushMatrix();
+		glTranslatef(mouseX, mouseY, 0.0);
+		//float angle = atan2(ship.dir[1], ship.dir[0]);
+		//glRotatef(g.ship.angle, 0.0f, 0.0f, 1.0f);
+		glBegin(GL_TRIANGLES);
+			//glVertex2f(-10.0f, -10.0f);
+			//glVertex2f(  0.0f, 20.0f);
+			//glVertex2f( 10.0f, -10.0f);
+			glVertex2f(-12.0f, -10.0f);
+			glVertex2f(  0.0f, 20.0f);
+			glVertex2f(  0.0f, -6.0f);
+			glVertex2f(  0.0f, -6.0f);
+			glVertex2f(  0.0f, 20.0f);
+			glVertex2f( 12.0f, -10.0f);
+		glEnd();
+		glColor3f(1.0f, 0.0f, 0.0f);
+		glBegin(GL_POINTS);
+		glVertex2f(0.0f, 0.0f);
+		glEnd();
+		glPopMatrix();
+}
+
 //From my lab12.cpp in 3480 folder
 void rotate_square(int sqr[4][2], int sqr2[4][2], float ang)
 {
@@ -104,6 +175,7 @@ void rotate_square(int sqr[4][2], int sqr2[4][2], float ang)
 	}
 }
 
+
 void andrewShowMenu(GLuint texture1, GLuint texture2, int xres, int yres)
 {
 	static float ang = 0.0;
@@ -114,15 +186,14 @@ void andrewShowMenu(GLuint texture1, GLuint texture2, int xres, int yres)
 		sqr[0][0] = 0;
 		sqr[0][1] = 0;
 		sqr[1][0] = 0;
-		sqr[1][1] = 400; //yres;
-		sqr[2][0] = 400; //xres;
-		sqr[2][1] = 400; //yres;
-		sqr[3][0] = 400; //xres;
+		sqr[1][1] = 400*5; //yres;
+		sqr[2][0] = 400*5; //xres;
+		sqr[2][1] = 400*5; //yres;
+		sqr[3][0] = 400*5; //xres;
 		sqr[3][1] = 0;
 		firsttime = 0;
 	}
 	//Back Image
-	//*
 	glColor3f(1.0, 1.0, 1.0);
 	glPushMatrix();
 	glBindTexture(GL_TEXTURE_2D, texture1);
@@ -134,10 +205,8 @@ void andrewShowMenu(GLuint texture1, GLuint texture2, int xres, int yres)
     glEnd();
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glPopMatrix();
-	//*/
 
 	//Front moving Image
-	//*
 	glColor3f(1.0, 1.0, 1.0);
 	glPushMatrix();
 	glTranslatef(float(xres/2), float(yres/2),0.0f);
@@ -154,10 +223,240 @@ void andrewShowMenu(GLuint texture1, GLuint texture2, int xres, int yres)
 	glDisable(GL_ALPHA_TEST);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glPopMatrix();
-	//*/
 	ang += 0.02;
 }
 
+void andrewShowButtons(GLuint tex1, GLuint tex2, GLuint tex3, GLuint tex4,
+ 		GLuint tex5, int xres, int yres)
+{
+	//Logo
+	int x1 = 250;
+	int y1 = 200;
+	glPushMatrix();
+	glBindTexture(GL_TEXTURE_2D, tex1);
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GREATER, 0.0f);
+	glColor4ub(255,255,255,255);
+	glBegin(GL_QUADS);
+		glTexCoord2f(0.0f, 1.0f); glVertex2i((xres/2) - x1, yres - (50 + y1));
+		glTexCoord2f(0.0f, 0.0f); glVertex2i((xres/2) - x1, yres - 50);
+		glTexCoord2f(1.0f, 0.0f); glVertex2i((xres/2) + x1, yres - 50);
+		glTexCoord2f(1.0f, 1.0f); glVertex2i((xres/2) + x1, yres - (50 + y1));
+	glEnd();
+	glDisable(GL_ALPHA_TEST);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glPopMatrix();
+
+	//Get the y value of the bottom of the logo
+	//and distance the buttons equally from each other to 
+	//the bottom of the screen
+	static int firsttime = 1;
+	if (firsttime == 1) {
+		int bottomLogo = yres - (y1 + 50);
+		int bufferFrame = 100; //gives 100pix buf from below the screen
+		int spaceAvaliable = bottomLogo - (bufferFrame * 2); 
+		ylocation = spaceAvaliable / 4; //4 is the # of buttons below the logo
+		firsttime = 0;
+	}
+
+	//Play Button
+	glColor3f(1.0, 1.0, 0.0);
+	x1 = BUTTON_WIDTH;
+	y1 = BUTTON_HEIGHT;
+	glPushMatrix();
+	glBindTexture(GL_TEXTURE_2D, tex2);
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GREATER, 0.0f);
+	glColor4ub(255,255,255,255);
+	glBegin(GL_QUADS);
+		glTexCoord2f(0.0f, 1.0f); 
+		glVertex2i(((xres/2) - x1), (ylocation * 4));
+		glTexCoord2f(0.0f, 0.0f); 
+		glVertex2i(((xres/2) - x1), (ylocation * 4) + y1);
+		glTexCoord2f(1.0f, 0.0f); 
+		glVertex2i(((xres/2) + x1), (ylocation * 4) + y1);
+		glTexCoord2f(1.0f, 1.0f); 
+		glVertex2i(((xres/2) + x1), (ylocation * 4));
+	glEnd();
+	glDisable(GL_ALPHA_TEST);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glPopMatrix();
+
+	//High Score Button
+	glColor3f(1.0, 1.0, 0.0);
+	glPushMatrix();
+	glBindTexture(GL_TEXTURE_2D, tex3);
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GREATER, 0.0f);
+	glColor4ub(255,255,255,255);
+	glBegin(GL_QUADS);
+		glTexCoord2f(0.0f, 1.0f);
+		glVertex2i(((xres/2) - x1), (ylocation * 3));
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex2i(((xres/2) - x1), (ylocation * 3) + y1);
+		glTexCoord2f(1.0f, 0.0f);
+		glVertex2i(((xres/2) + x1), (ylocation * 3) + y1);
+		glTexCoord2f(1.0f, 1.0f);
+		glVertex2i(((xres/2) + x1), (ylocation * 3));
+	glEnd();
+	glDisable(GL_ALPHA_TEST);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glPopMatrix();
+
+	//Credits Button
+	glColor3f(1.0, 1.0, 0.0);
+	glPushMatrix();
+	glBindTexture(GL_TEXTURE_2D, tex4);
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GREATER, 0.0f);
+	glColor4ub(255,255,255,255);
+	glBegin(GL_QUADS);
+		glTexCoord2f(0.0f, 1.0f); 
+		glVertex2i(((xres/2) - x1), (ylocation * 2));
+		glTexCoord2f(0.0f, 0.0f); 
+		glVertex2i(((xres/2) - x1), (ylocation * 2) + y1);
+		glTexCoord2f(1.0f, 0.0f); 
+		glVertex2i(((xres/2) + x1), (ylocation * 2) + y1);
+		glTexCoord2f(1.0f, 1.0f); 
+		glVertex2i(((xres/2) + x1), (ylocation * 2));
+	glEnd();
+	glDisable(GL_ALPHA_TEST);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glPopMatrix();
+	//-------------------------------------------------
+	//Exit Button
+	glColor3f(1.0, 1.0, 0.0);
+	glPushMatrix();
+	glBindTexture(GL_TEXTURE_2D, tex5);
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GREATER, 0.0f);
+	glColor4ub(255,255,255,255);
+	glBegin(GL_QUADS);
+		glTexCoord2f(0.0f, 1.0f); 
+		glVertex2i(((xres/2) - x1), (ylocation * 1));
+		glTexCoord2f(0.0f, 0.0f); 
+		glVertex2i(((xres/2) - x1), (ylocation * 1) + y1);
+		glTexCoord2f(1.0f, 0.0f); 
+		glVertex2i(((xres/2) + x1), (ylocation * 1) + y1);
+		glTexCoord2f(1.0f, 1.0f); 
+		glVertex2i(((xres/2) + x1), (ylocation * 1));
+	glEnd();
+	glDisable(GL_ALPHA_TEST);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glPopMatrix();
+}
+
+void andrewButtonHighlight(int mouseX, int mouseY, int xres)
+{
+	int button = 0;
+	int x1 = BUTTON_WIDTH;
+	int y1 = BUTTON_HEIGHT;
+	if ((mouseX >= (xres / 2) - x1) && (mouseX <= (xres / 2) + x1)) {
+		if ((mouseY >= (ylocation * 4)) && 
+			(mouseY <= (ylocation * 4) + BUTTON_HEIGHT)) {
+			button = 4;
+		}
+		if ((mouseY >= (ylocation * 3)) && 
+			(mouseY <= (ylocation * 3) + BUTTON_HEIGHT)) {
+			button = 3;
+		}
+		if ((mouseY >= (ylocation * 2)) && 
+			(mouseY <= (ylocation * 2) + BUTTON_HEIGHT)) {
+			button = 2;
+		}
+		if ((mouseY >= (ylocation)) && 
+			(mouseY <= (ylocation) + BUTTON_HEIGHT)) {
+			button = 1;
+		}
+	}
+	if (button != 0) {
+		int widthLine = 2;
+		glColor3f(1.0, 0.9, 0.0);
+		glBegin(GL_QUADS);
+			glVertex2f(((xres / 2) + x1 + widthLine), 
+					(ylocation * button) + y1 + widthLine);
+			glVertex2f(((xres / 2) - x1 - widthLine), 
+					(ylocation * button) + y1 + widthLine);
+			glVertex2f(((xres / 2) - x1 - widthLine), 
+					(ylocation * button) + y1 - widthLine);
+			glVertex2f(((xres / 2) + x1 - widthLine), 
+					(ylocation * button) + y1 - widthLine);
+		glEnd();
+		glBegin(GL_QUADS);
+			glVertex2f(((xres / 2) - x1 + widthLine), 
+					(ylocation * button) + y1 + widthLine);
+			glVertex2f(((xres / 2) - x1 - widthLine), 
+					(ylocation * button) + y1 + widthLine);
+			glVertex2f(((xres / 2) - x1 - widthLine), 
+					(ylocation * button) - widthLine);
+			glVertex2f(((xres / 2) - x1 + widthLine), 
+					(ylocation * button) - widthLine);
+		glEnd();
+		glBegin(GL_QUADS);
+			glVertex2f(((xres / 2) + x1 + widthLine), 
+					(ylocation * button) + widthLine);
+			glVertex2f(((xres / 2) - x1 - widthLine), 
+					(ylocation * button) + widthLine);
+			glVertex2f(((xres / 2) - x1 - widthLine), 
+					(ylocation * button) - widthLine);
+			glVertex2f(((xres / 2) + x1 - widthLine), 
+						(ylocation * button) - widthLine);
+		glEnd();
+		glBegin(GL_QUADS);
+			glVertex2f(((xres / 2) + x1 + widthLine), 
+					(ylocation * button) + y1 + widthLine);
+			glVertex2f(((xres / 2) + x1 - widthLine), 
+					(ylocation * button) + y1 + widthLine);
+			glVertex2f(((xres / 2) + x1 - widthLine), 
+					(ylocation * button) - widthLine);
+			glVertex2f(((xres / 2) + x1 + widthLine), 
+					(ylocation * button) - widthLine);
+		glEnd();	
+	}
+}
+
+int andrewButtonAction(int mouseX, int mouseY, int screen, int xres)
+{
+	int x1 = BUTTON_WIDTH;
+	//int y1 = BUTTON_HEIGHT;
+	if (screen == 1) {
+		if ((mouseX >= (xres / 2) - x1) && (mouseX <= (xres / 2) + x1)) {
+			if ((mouseY >= (ylocation * 4)) && 
+				(mouseY <= (ylocation * 4) + BUTTON_HEIGHT)) {
+				printf("PLAY BUTTON WAS PRESSED\n");
+				return 1;
+			}
+			if ((mouseY >= (ylocation * 3)) && 
+				(mouseY <= (ylocation * 3) + BUTTON_HEIGHT)) {
+				printf("HIGH SCORES BUTTON WAS PRESSED\n");
+				return 2;
+			}
+			if ((mouseY >= (ylocation * 2)) && 
+				(mouseY <= (ylocation * 2) + BUTTON_HEIGHT)) {
+				printf("CREDIT BUTTON WAS PRESSED\n");
+				return 3;
+			}
+			if ((mouseY >= (ylocation)) && 
+				(mouseY <= (ylocation) + BUTTON_HEIGHT)) {
+				//printf("EXIT BUTTON WAS PRESSED\n");
+				printf("Thank you for playing our game\n");
+				//closeTheGame();
+				return 4;
+			}
+		}
+	}
+	if (screen == 2) {
+		if ((mouseX >= BUTTON_BACK) && 
+				(mouseX <= BUTTON_BACK + (BUTTON_WIDTH * 2))) {
+			if ((mouseY >= BUTTON_BACK) && 
+					(mouseY <= BUTTON_BACK + BUTTON_HEIGHT)) {
+				printf("MENU BUTTON WAS PRESSED\n");
+				return 1;
+			}
+		}
+	}
+	return 0;
+}
 
 //Sets up and binds the background texture
 void andrewBackImg(GLuint texture, int xres, int yres, float xc[], float yc[])
@@ -295,16 +594,16 @@ void andrewHighscoreBox(int yres, int xres, int score, int* high_score)
 		glVertex2f(((xres / 2) + x1), (yres - y1));
 		glVertex2f(((xres / 2) - x1), (yres - y1));
 		glVertex2f(((xres / 2) - x1), (yres - y2));
-		glVertex2f(((xres / 2)+ x1), (yres - y2));
+		glVertex2f(((xres / 2) + x1), (yres - y2));
 	glEnd();
 
 	glColor3f(0.3, 0.3, 0.3);
 	int j = 24;
 	for (int i = 1; i < 6; i++) {
-	glBegin(GL_LINES);
-    	glVertex2f(((xres / 2) + x1), (yres - (y1 + (23 + (i*j)))));
-    	glVertex2f(((xres / 2) - x1), (yres - (y1 + (23 + (i*j)))));
-	glEnd();
+		glBegin(GL_LINES);
+    		glVertex2f(((xres / 2) + x1), (yres - (y1 + (23 + (i*j)))));
+    		glVertex2f(((xres / 2) - x1), (yres - (y1 + (23 + (i*j)))));
+		glEnd();
 	}
 
 	Rect r;
