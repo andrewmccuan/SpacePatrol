@@ -539,7 +539,7 @@ void andrewShowMenu(GLuint texture1, GLuint texture2, int xres, int yres);
 void andrewShowButtons(GLuint tex1, GLuint tex2, GLuint tex3, GLuint tex4, 
 		GLuint tex5, int xres, int yres);
 void andrewDrawMouse(int mouseX, int mouseY);
-void andrewButtonHighlight(int mouseX, int mouseY, int xres);
+void andrewButtonHighlight(int mouseX, int mouseY, int screen, int xres);
 int andrewButtonAction(int mouseX, int mouseY, int screen,
 		int xres);
 void closeTheGame();
@@ -1791,17 +1791,22 @@ void render()
 	}
 
 	if (gl.show_menu == 1) {
+		int screen = 1;
 		andrewShowMenu(gl.menuTexture, gl.menuGalTexture, gl.xres, gl.yres);
 		andrewShowButtons(gl.menuLogo, gl.menuPlay, gl.menuHighscores,
 			gl.menuCredits, gl.menuExit, gl.xres, gl.yres);
-		andrewButtonHighlight(gl.mx, (gl.yres - gl.my), gl.xres);
+		andrewButtonHighlight(gl.mx, (gl.yres - gl.my), screen, gl.xres);
 		andrewDrawMouse(gl.mx, (gl.yres - gl.my));
 	}
 	if (gl.show_credits == 1) {
+		int screen = 2;
 		andrewShowCredits(gl.menuCreditsPage, gl.menuButton, gl.xres, gl.yres);
+		andrewButtonHighlight(gl.mx, (gl.yres - gl.my), screen, gl.xres);
 	}
 	if (gl.show_highscore == 1) {
+		int screen = 2;
 		andrewShowHighscore(gl.menuHighscorePage, gl.menuButton, gl.xres, gl.yres);
+		andrewButtonHighlight(gl.mx, (gl.yres - gl.my), screen, gl.xres);
 		if (!gl.arr) {
 			int arrTest[] = {1, 2, 3, 4, 5};
 			andrewHighscoreBox(gl.yres, gl.xres, g.score, arrTest);

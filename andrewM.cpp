@@ -346,73 +346,131 @@ void andrewShowButtons(GLuint tex1, GLuint tex2, GLuint tex3, GLuint tex4,
 	glPopMatrix();
 }
 
-void andrewButtonHighlight(int mouseX, int mouseY, int xres)
+void andrewButtonHighlight(int mouseX, int mouseY, int screen, int xres)
 {
 	int button = 0;
 	int x1 = BUTTON_WIDTH;
 	int y1 = BUTTON_HEIGHT;
-	if ((mouseX >= (xres / 2) - x1) && (mouseX <= (xres / 2) + x1)) {
-		if ((mouseY >= (ylocation * 4)) && 
-			(mouseY <= (ylocation * 4) + BUTTON_HEIGHT)) {
-			button = 4;
+
+	if (screen == 1) {
+		if ((mouseX >= (xres / 2) - x1) && (mouseX <= (xres / 2) + x1)) {
+			if ((mouseY >= (ylocation * 4)) && 
+					(mouseY <= (ylocation * 4) + BUTTON_HEIGHT)) {
+				button = 4;
+			}
+			if ((mouseY >= (ylocation * 3)) && 
+					(mouseY <= (ylocation * 3) + BUTTON_HEIGHT)) {
+				button = 3;
+			}
+			if ((mouseY >= (ylocation * 2)) && 
+					(mouseY <= (ylocation * 2) + BUTTON_HEIGHT)) {
+				button = 2;
+			}
+			if ((mouseY >= (ylocation)) && 
+					(mouseY <= (ylocation) + BUTTON_HEIGHT)) {
+				button = 1;
+			}
 		}
-		if ((mouseY >= (ylocation * 3)) && 
-			(mouseY <= (ylocation * 3) + BUTTON_HEIGHT)) {
-			button = 3;
-		}
-		if ((mouseY >= (ylocation * 2)) && 
-			(mouseY <= (ylocation * 2) + BUTTON_HEIGHT)) {
-			button = 2;
-		}
-		if ((mouseY >= (ylocation)) && 
-			(mouseY <= (ylocation) + BUTTON_HEIGHT)) {
-			button = 1;
+	}
+	if (screen == 2) {
+		if ((mouseX >= BUTTON_BACK) && 
+				(mouseX <= BUTTON_BACK + (BUTTON_WIDTH * 2))) {
+			if ((mouseY >= BUTTON_BACK) && 
+					(mouseY <= BUTTON_BACK + BUTTON_HEIGHT)) {
+				button = 10;
+			}
 		}
 	}
 	if (button != 0) {
 		int widthLine = 2;
-		glColor3f(1.0, 0.9, 0.0);
-		glBegin(GL_QUADS);
-			glVertex2f(((xres / 2) + x1 + widthLine), 
-					(ylocation * button) + y1 + widthLine);
-			glVertex2f(((xres / 2) - x1 - widthLine), 
-					(ylocation * button) + y1 + widthLine);
-			glVertex2f(((xres / 2) - x1 - widthLine), 
-					(ylocation * button) + y1 - widthLine);
-			glVertex2f(((xres / 2) + x1 - widthLine), 
-					(ylocation * button) + y1 - widthLine);
-		glEnd();
-		glBegin(GL_QUADS);
-			glVertex2f(((xres / 2) - x1 + widthLine), 
-					(ylocation * button) + y1 + widthLine);
-			glVertex2f(((xres / 2) - x1 - widthLine), 
-					(ylocation * button) + y1 + widthLine);
-			glVertex2f(((xres / 2) - x1 - widthLine), 
-					(ylocation * button) - widthLine);
-			glVertex2f(((xres / 2) - x1 + widthLine), 
-					(ylocation * button) - widthLine);
-		glEnd();
-		glBegin(GL_QUADS);
-			glVertex2f(((xres / 2) + x1 + widthLine), 
-					(ylocation * button) + widthLine);
-			glVertex2f(((xres / 2) - x1 - widthLine), 
-					(ylocation * button) + widthLine);
-			glVertex2f(((xres / 2) - x1 - widthLine), 
-					(ylocation * button) - widthLine);
-			glVertex2f(((xres / 2) + x1 - widthLine), 
+		if (button == 10) {
+			glColor3f(1.0, 0.9, 0.0);
+			glBegin(GL_QUADS);
+				glVertex2f((BUTTON_BACK + (x1*2) + widthLine), 
+						(BUTTON_BACK + y1 + widthLine));
+				glVertex2f((BUTTON_BACK - widthLine), 
+						(BUTTON_BACK + y1 + widthLine));
+				glVertex2f((BUTTON_BACK - widthLine), 
+						(BUTTON_BACK + y1 - widthLine));
+				glVertex2f(BUTTON_BACK + (x1*2) + widthLine, 
+						(BUTTON_BACK + y1 - widthLine));		
+			glEnd();
+			glBegin(GL_QUADS);
+				glVertex2f((BUTTON_BACK + widthLine), 
+						(BUTTON_BACK + y1 + widthLine));
+				glVertex2f((BUTTON_BACK - widthLine), 
+						(BUTTON_BACK + y1 + widthLine));
+				glVertex2f((BUTTON_BACK - widthLine), 
+						(BUTTON_BACK - widthLine));
+				glVertex2f((BUTTON_BACK + widthLine), 
+						(BUTTON_BACK - widthLine));
+			glEnd();
+			glBegin(GL_QUADS);
+				glVertex2f((BUTTON_BACK + (x1*2) + widthLine), 
+						(BUTTON_BACK + widthLine));
+				glVertex2f((BUTTON_BACK - widthLine), 
+						(BUTTON_BACK + widthLine));
+				glVertex2f((BUTTON_BACK - widthLine), 
+						(BUTTON_BACK - widthLine));
+				glVertex2f(BUTTON_BACK + (x1*2) + widthLine, 
+						(BUTTON_BACK - widthLine));
+			glEnd();
+			glBegin(GL_QUADS);
+				glVertex2f((BUTTON_BACK + (x1*2) + widthLine), 
+						(BUTTON_BACK + y1 + widthLine));
+				glVertex2f((BUTTON_BACK + (x1*2) - widthLine), 
+						(BUTTON_BACK + y1 + widthLine));
+				glVertex2f((BUTTON_BACK + (x1*2) - widthLine), 
+						(BUTTON_BACK - widthLine));
+				glVertex2f((BUTTON_BACK + (x1*2) + widthLine), 
+						(BUTTON_BACK - widthLine));
+			glEnd();
+		}
+		else {
+			glColor3f(1.0, 0.9, 0.0);
+			glBegin(GL_QUADS);
+				glVertex2f(((xres / 2) + x1 + widthLine), 
+						(ylocation * button) + y1 + widthLine);
+				glVertex2f(((xres / 2) - x1 - widthLine), 
+						(ylocation * button) + y1 + widthLine);
+				glVertex2f(((xres / 2) - x1 - widthLine), 
+						(ylocation * button) + y1 - widthLine);
+				glVertex2f(((xres / 2) + x1 - widthLine), 
+						(ylocation * button) + y1 - widthLine);
+			glEnd();
+			glBegin(GL_QUADS);
+				glVertex2f(((xres / 2) - x1 + widthLine), 
+						(ylocation * button) + y1 + widthLine);
+				glVertex2f(((xres / 2) - x1 - widthLine), 
+						(ylocation * button) + y1 + widthLine);
+				glVertex2f(((xres / 2) - x1 - widthLine), 
 						(ylocation * button) - widthLine);
-		glEnd();
-		glBegin(GL_QUADS);
-			glVertex2f(((xres / 2) + x1 + widthLine), 
-					(ylocation * button) + y1 + widthLine);
-			glVertex2f(((xres / 2) + x1 - widthLine), 
-					(ylocation * button) + y1 + widthLine);
-			glVertex2f(((xres / 2) + x1 - widthLine), 
-					(ylocation * button) - widthLine);
-			glVertex2f(((xres / 2) + x1 + widthLine), 
-					(ylocation * button) - widthLine);
-		glEnd();	
+				glVertex2f(((xres / 2) - x1 + widthLine), 
+						(ylocation * button) - widthLine);
+			glEnd();
+			glBegin(GL_QUADS);
+				glVertex2f(((xres / 2) + x1 + widthLine), 
+						(ylocation * button) + widthLine);
+				glVertex2f(((xres / 2) - x1 - widthLine), 
+						(ylocation * button) + widthLine);
+				glVertex2f(((xres / 2) - x1 - widthLine), 
+						(ylocation * button) - widthLine);
+				glVertex2f(((xres / 2) + x1 - widthLine), 
+						(ylocation * button) - widthLine);
+			glEnd();
+			glBegin(GL_QUADS);
+				glVertex2f(((xres / 2) + x1 + widthLine), 
+						(ylocation * button) + y1 + widthLine);
+				glVertex2f(((xres / 2) + x1 - widthLine), 
+						(ylocation * button) + y1 + widthLine);
+				glVertex2f(((xres / 2) + x1 - widthLine), 
+						(ylocation * button) - widthLine);
+				glVertex2f(((xres / 2) + x1 + widthLine), 
+						(ylocation * button) - widthLine);
+			glEnd();	
+		}
 	}
+
 }
 
 int andrewButtonAction(int mouseX, int mouseY, int screen, int xres)
