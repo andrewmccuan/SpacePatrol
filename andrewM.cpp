@@ -130,12 +130,7 @@ void andrewDrawMouse(int mouseX, int mouseY)
 	glColor3f(0.0, 1.0, 0.0);
 		glPushMatrix();
 		glTranslatef(mouseX, mouseY, 0.0);
-		//float angle = atan2(ship.dir[1], ship.dir[0]);
-		//glRotatef(g.ship.angle, 0.0f, 0.0f, 1.0f);
 		glBegin(GL_TRIANGLES);
-			//glVertex2f(-10.0f, -10.0f);
-			//glVertex2f(  0.0f, 20.0f);
-			//glVertex2f( 10.0f, -10.0f);
 			glVertex2f(-12.0f, -10.0f);
 			glVertex2f(  0.0f, 20.0f);
 			glVertex2f(  0.0f, -6.0f);
@@ -626,6 +621,7 @@ void andrewHelpMenu(int yres, int xres, int bot)
 	ggprint8b(&r, 16, 0x0000ffff, "Keys:");
 	ggprint8b(&r, 16, 0x0000ffff, "[Arrow Keys] Move");
 	ggprint8b(&r, 16, 0x0000ffff, "[Space] Shoot");
+	ggprint8b(&r, 16, 0x0000ffff, "[M] Menu");
 	ggprint8b(&r, 16, 0x0000ffff, "[TAB] Highscore (Scoreboard)");
 	ggprint8b(&r, 16, 0x0000ffff, "[P] Highscore (Save Score)");
 	ggprint8b(&r, 16, 0x0000ffff, "[H] Toggle Help Menu");

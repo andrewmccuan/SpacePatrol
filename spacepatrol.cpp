@@ -621,11 +621,11 @@ void setupGame()
 
 	//Come Back to later
 	//possible seg fault
-	/*
+	//*
 	gl.arr = high_score(g.score);
 	std::cout << "Contacted server" << std::endl;
 	std::cout << *(gl.arr) << std::endl;
-	*/
+	//*/
 }
 
 //===============================================
@@ -1802,11 +1802,13 @@ void render()
 		int screen = 2;
 		andrewShowCredits(gl.menuCreditsPage, gl.menuButton, gl.xres, gl.yres);
 		andrewButtonHighlight(gl.mx, (gl.yres - gl.my), screen, gl.xres);
+		andrewDrawMouse(gl.mx, (gl.yres - gl.my));
 	}
 	if (gl.show_highscore == 1) {
 		int screen = 2;
 		andrewShowHighscore(gl.menuHighscorePage, gl.menuButton, gl.xres, gl.yres);
 		andrewButtonHighlight(gl.mx, (gl.yres - gl.my), screen, gl.xres);
+		andrewDrawMouse(gl.mx, (gl.yres - gl.my));
 		if (!gl.arr) {
 			int arrTest[] = {1, 2, 3, 4, 5};
 			andrewHighscoreBox(gl.yres, gl.xres, g.score, arrTest);
