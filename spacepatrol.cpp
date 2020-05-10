@@ -60,6 +60,7 @@ const float gravity = -0.2f;
 const int MAX_BULLETS = 11;
 const Flt MINIMUM_ASTEROID_SIZE = 60.0;
 const int MAX_ENEMIES = 2;
+const int NUM_POWERUPS = 3;
 
 //-----------------------------------------------------------------------------
 //Setup timers
@@ -281,7 +282,7 @@ public:
 //-----------------------------------------------------------------------------
 //Function prototypes requiured in the game class.
 
-PowerUp* buildPowerUp(PowerUp*, int, float, float);
+void buildPowerUp(PowerUp*, int, float);
 
 //-----------------------------------------------------------------------------
 
@@ -290,34 +291,37 @@ public:
 	Ship ship;
 	Ship enemies[MAX_ENEMIES];
 	Asteroid *ahead;
-	PowerUp *next;
+	PowerUp *newer;
 	Bullet *barr;
 	Bullet *ebarr;
 	int nships;
 	int nasteroids;
 	int score;
 	int nbullets;
+	int npowerups;
 	int ebullets;
 	int nenemies;
 	int num_calls_vel;
 	struct timespec bulletTimer;
 	struct timespec ebulletTimer;
+	struct timespec powerUpTimer;
 	struct timespec mouseThrustTimer;
 	bool mouseThrustOn;
 public:
 	Game() {
 		score = 0;
 		ahead = NULL;
-		next = NULL;
+		newer = NULL;
 		barr = new Bullet[MAX_BULLETS];
 		ebarr = new Bullet[100];
 		nasteroids = 0;
+		npowerups = 0;
 		nbullets = 0;
 		ebullets = 0;
 		nships = 0;
 		mouseThrustOn = false;
 		num_calls_vel = 0;
-		//build 10 asteroids...
+		//build 5 asteroids...
 		for (int j=0; j<5; j++) {
 			Asteroid *a = new Asteroid;
 			a->nverts = 8;
@@ -348,12 +352,7 @@ public:
 			ahead = a;
 			++nasteroids;
 		}
-
-		//----------------------------------------------------------------
-		//Draw a single PowerUp
-		PowerUp *p = new PowerUp;
-		next = buildPowerUp(p, gl.yres, rnd(), PI);
-		//----------------------------------------------------------------
+		clock_gettime(CLOCK_REALTIME, &powerUpTimer);
 
 		clock_gettime(CLOCK_REALTIME, &bulletTimer);
 		nenemies = 0;
@@ -503,6 +502,7 @@ public:
 
 
 //function prototypes
+void checkIfPowerUpShouldSpawn();
 void setupGame();
 void renderPowerUpImage(GLuint, float*);
 void updatePowerUpPosition (PowerUp*, int, int);
@@ -580,6 +580,7 @@ int main()
 		clock_gettime(CLOCK_REALTIME, &timeCurrent);
 		timeSpan = timeDiff(&timeStart, &timeCurrent);
 		timeCopy(&timeStart, &timeCurrent);
+		checkIfPowerUpShouldSpawn();
 		physicsCountdown += timeSpan;
 		while (physicsCountdown >= physicsRate) {
 			physics();
@@ -608,6 +609,22 @@ void setupGame()
 	std::cout << "Contacted server" << std::endl;
 	std::cout << *(gl.arr) << std::endl;
 	//*/
+}
+
+void checkIfPowerUpShouldSpawn()
+{
+	double td = timeDiff(&g.powerUpTimer, &timeCurrent);
+	if (td > 30.0 && g.npowerups < NUM_POWERUPS)
+	{
+		PowerUp *p = new PowerUp;
+		buildPowerUp(p, gl.yres, rnd());
+		p->next = g.newer;
+		if (g.newer != NULL)
+			g.newer->prev = p;
+		g.newer = p;
+		++g.npowerups;
+		timeCopy(&g.powerUpTimer, &timeCurrent);
+	}
 }
 
 //===============================================
@@ -1290,7 +1307,7 @@ void physics()
 	}
 	//
 	//Update powerup positions
-	updatePowerUpPosition (g.next, gl.yres, gl.xres);
+	updatePowerUpPosition (g.newer, gl.yres, gl.xres);
 
 
 	//
@@ -1537,30 +1554,30 @@ void enemy_bullets()
 	if (ts > 0.4) {
 		timeCopy(&g.ebulletTimer, &bt);
 		for (int i = 0; i<g.nenemies; i++) {
-		if (g.ebullets < 100 && g.enemies[i].numbullets < 50 && 
-			g.enemies[i].valid_enemy) {
+			if (g.ebullets < 100 && g.enemies[i].numbullets < 50 && 
+				g.enemies[i].valid_enemy) {
 
-			g.enemies[i].numbullets += 1;
-			Bullet *b = &g.ebarr[g.ebullets];
-			timeCopy(&b->time, &bt);
-			b->pos[0] = g.enemies[i].pos[0];
-			b->pos[1] = g.enemies[i].pos[1];
-			b->vel[0] = g.enemies[i].vel[0];
-			b->vel[1] = g.enemies[i].vel[1];
-			//convert ship angle to radians
-			Flt rad = ((g.enemies[i].angle+90.0) / 360.0f) * PI * 2.0;
-			//convert angle to a vector
-			Flt xdir = cos(rad);
-			Flt ydir = sin(rad);
-			b->pos[0] += xdir*20.0f;
-			b->pos[1] += ydir*20.0f;
-			b->vel[0] += xdir*6.0f + rnd()*0.1;
-			b->vel[1] += ydir*6.0f + rnd()*0.1;
-			b->color[0] = 1.0f;
-			b->color[1] = 1.0f;
-			b->color[2] = 1.0f;
-			++g.ebullets;
-		}
+				g.enemies[i].numbullets += 1;
+				Bullet *b = &g.ebarr[g.ebullets];
+				timeCopy(&b->time, &bt);
+				b->pos[0] = g.enemies[i].pos[0];
+				b->pos[1] = g.enemies[i].pos[1];
+				b->vel[0] = g.enemies[i].vel[0];
+				b->vel[1] = g.enemies[i].vel[1];
+				//convert ship angle to radians
+				Flt rad = ((g.enemies[i].angle+90.0) / 360.0f) * PI * 2.0;
+				//convert angle to a vector
+				Flt xdir = cos(rad);
+				Flt ydir = sin(rad);
+				b->pos[0] += xdir*20.0f;
+				b->pos[1] += ydir*20.0f;
+				b->vel[0] += xdir*6.0f + rnd()*0.1;
+				b->vel[1] += ydir*6.0f + rnd()*0.1;
+				b->color[0] = 1.0f;
+				b->color[1] = 1.0f;
+				b->color[2] = 1.0f;
+				++g.ebullets;
+			}
 		}
 	}
 
@@ -1748,8 +1765,12 @@ void render()
 	}
 	//-------------------------------------------------------------------------
 	// Draw the PowerUps
-	renderPowerUps(g.next);
-	renderPowerUpImage(gl.powerUp, (float*)g.next->pos);
+	PowerUp *p = g.newer;
+	while (p) {
+		renderPowerUps(p);
+		renderPowerUpImage(gl.powerUp, (float*)p->pos);
+		p = p->next;
+	}
 	//-------------------------------------------------------------------------
 	//-------------------------------------------------------------------------
 	//Draw the bullets

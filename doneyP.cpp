@@ -70,10 +70,6 @@ void renderPowerUps(PowerUp *ahead)
 		glPushMatrix();
 		glTranslatef(a->pos[0], a->pos[1], a->pos[2]);
 		glBegin(GL_LINE_LOOP);
-		//Log("%i verts\n",a->nverts);
-		for (int j=0; j<a->nverts; j++) {
-			glVertex2f(a->vert[j][0], a->vert[j][1]);
-		}
 		glEnd();
 		glPopMatrix();
 		glColor3f(1.0f, 0.0f, 0.0f);
@@ -84,18 +80,10 @@ void renderPowerUps(PowerUp *ahead)
 	}
 }
 
-PowerUp* buildPowerUp(PowerUp *p, int yres, float random, float PI)
+void buildPowerUp(PowerUp *p, int yres, float random)
 {
-	p->nverts = 4;
+	srand(time(NULL));
 	p->radius = 40.0/2;
-	Flt r2 = p->radius / 2.0;
-	Flt angle = 0.0f;
-	Flt inc = (PI * 2.0) / (Flt)p->nverts;
-	for (int i=0; i<p->nverts; i++) {
-		p->vert[i][0] = sin(angle) * (r2 + random * p->radius);
-		p->vert[i][1] = cos(angle) * (r2 + random * p->radius);
-		angle += inc;
-	}
 	p->pos[0] = 1500;
 	p->pos[1] = (Flt)(rand() % yres);
 	p->pos[2] = 0.5f;
@@ -107,7 +95,6 @@ PowerUp* buildPowerUp(PowerUp *p, int yres, float random, float PI)
 	p->vel[0] = (Flt)(random *  2.0 - 1.0);
 	p->vel[1] = (Flt)(random * 2.0 - 1.0);
 
-	return p;
 }
 
 void updatePowerUpPosition (PowerUp *p, int yres, int xres)
@@ -151,7 +138,3 @@ void renderPowerUpImage(GLuint texture, float* pos)
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glPopMatrix();
 }
-
-
-
-
