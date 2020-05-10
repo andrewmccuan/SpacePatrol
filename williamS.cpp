@@ -182,7 +182,7 @@ int * high_score(int score)
 	memset(buf, '\0', sizeof(buf2));	
 	int j = 0;
 	int k = 0;
-	while (bytes <= 0){
+	while (bytes <= 0) {
 		flag = 0;		
 		bytes = SSL_read(ssl, buf, sizeof(buf));
 		//cout << "Bytes" << bytes << "Buf" << buf << endl;
@@ -275,7 +275,11 @@ int * high_score(int score)
 			}
 		}
 
-		if (bytes == 0) ++nerrs; else nerrs = 0;
+		if (bytes == 0) {
+			++nerrs;
+		} else {
+			nerrs = 0;
+		}
 		//A slight pause can cause fewer reads to be needed.
 		usleep(20000);
 	}
@@ -464,7 +468,7 @@ void change_vel(Ship *my_enemy, int num_calls, int ship_quadrant)
 }
 
 void det_coll_enemy(int *num_enemies, int num_bullets, Ship *enemies,
-	Bullet *barr)
+		Bullet *barr)
 {
 	Bullet *b = barr;
 	for (int i = 0; i < num_bullets; i++) {
@@ -590,13 +594,13 @@ void hit_point_box(int yres, int xres, int bot, Ship player)
 		glColor3f(1.0, 1.0, 1.0);
 		glBegin(GL_QUADS);
 			glVertex2f((xres - x1 + 1 + up_cntr * hp_box_width), 
-				(yres - y1 - 17));
+					(yres - y1 - 17));
 			glVertex2f((xres - x2 - 1 - down_cntr * hp_box_width),
-				(yres - y1 - 17));
+					(yres - y1 - 17));
 			glVertex2f((xres - x2 - 1 - down_cntr * hp_box_width),
-				(yres - y2 + 1));
+					(yres - y2 + 1));
 			glVertex2f((xres - x1 + 1 + up_cntr * hp_box_width), 
-				(yres - y2 + 1));
+					(yres - y2 + 1));
 		glEnd();
 		up_cntr++;
 		down_cntr--;
