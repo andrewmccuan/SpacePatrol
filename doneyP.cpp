@@ -92,8 +92,8 @@ void buildPowerUp(PowerUp *p, int yres, float random)
 	p->color[0] = 0.6;
 	p->color[1] = 0.6;
 	p->color[2] = 0.6;
-	p->vel[0] = (Flt)(random *  2.0 - 1.0);
-	p->vel[1] = (Flt)(random * 2.0 - 1.0);
+	p->vel[0] = (Flt)(abs(random) * 2.0);
+	p->vel[1] = (Flt)(abs(random) * 2.0);
 
 }
 
@@ -137,4 +137,69 @@ void renderPowerUpImage(GLuint texture, float* pos)
 	glDisable(GL_ALPHA_TEST);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glPopMatrix();
+}
+
+int detectPowerUpCollisionWithShip(float xval, float yval, PowerUp *p)
+{
+	while (p) {
+		if ((((xval) - (p->pos[0] - p->radius)) >= 0) &&
+			(((p->pos[0] + p->radius)) - xval >= 0) &&  	
+			(((yval) - (p->pos[1] - p->radius)) >= 0) &&
+			(((p->pos[1] + p->radius)) - yval >= 0)) {
+
+			return 1;
+		}
+		p = p->next;
+	}
+	return 0;
+}
+
+// Weapon Upgrade One
+void powerUpOne(Bullet *barr, int nbullets, int MAX_BULLETS, Ship ship, 
+				double rand, double PI)
+{
+	if (nbullets < MAX_BULLETS) {
+		Bullet *b = &barr[nbullets];
+		b->pos[0] = ship.pos[0];
+		b->pos[1] = ship.pos[1];
+		b->vel[0] = ship.vel[0];
+		b->vel[1] = ship.vel[1];
+		//convert ship angle to radians
+		Flt rad = ((ship.angle+135.0) / 360.0f) * PI * 2.0;
+		//convert angle to a vector
+		Flt xdir = cos(rad);
+		Flt ydir = sin(rad);
+		b->pos[0] += xdir*20.0f;
+		b->pos[1] += ydir*20.0f;
+		b->vel[0] += xdir*6.0f + rand*0.1;
+		b->vel[1] += ydir*6.0f + rand*0.1;
+		b->color[0] = 1.0f;
+		b->color[1] = 1.0f;
+		b->color[2] = 1.0f;
+	}
+}
+
+//Weapon Upgrade Two
+void powerUpTwo(Bullet *barr, int nbullets, int MAX_BULLETS, Ship ship, 
+				double rand, double PI)
+{
+	if (nbullets < MAX_BULLETS) {
+		Bullet *b = &barr[nbullets];
+		b->pos[0] = ship.pos[0];
+		b->pos[1] = ship.pos[1];
+		b->vel[0] = ship.vel[0];
+		b->vel[1] = ship.vel[1];
+		//convert ship angle to radians
+		Flt rad = ((ship.angle+45.0) / 360.0f) * PI * 2.0;
+		//convert angle to a vector
+		Flt xdir = cos(rad);
+		Flt ydir = sin(rad);
+		b->pos[0] += xdir*20.0f;
+		b->pos[1] += ydir*20.0f;
+		b->vel[0] += xdir*6.0f + rand*0.1;
+		b->vel[1] += ydir*6.0f + rand*0.1;
+		b->color[0] = 1.0f;
+		b->color[1] = 1.0f;
+		b->color[2] = 1.0f;
+	}
 }

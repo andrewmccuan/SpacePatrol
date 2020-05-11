@@ -57,10 +57,10 @@ const float timeslice = 1.0f;
 const float gravity = -0.2f;
 #define PI 3.141592653589793
 #define ALPHA 1
-const int MAX_BULLETS = 11;
+const int MAX_BULLETS = 11*6;
 const Flt MINIMUM_ASTEROID_SIZE = 60.0;
 const int MAX_ENEMIES = 2;
-const int NUM_POWERUPS = 3;
+const int NUM_POWERUPS = 1;
 
 //-----------------------------------------------------------------------------
 //Setup timers
@@ -302,6 +302,9 @@ public:
 	int ebullets;
 	int nenemies;
 	int num_calls_vel;
+	int puOne;
+	int puTwo;
+	int puThree;
 	struct timespec bulletTimer;
 	struct timespec ebulletTimer;
 	struct timespec powerUpTimer;
@@ -319,6 +322,9 @@ public:
 		nbullets = 0;
 		ebullets = 0;
 		nships = 0;
+		puOne = 0;
+		puTwo = 0;
+		puThree = 0;
 		mouseThrustOn = false;
 		num_calls_vel = 0;
 		//build 5 asteroids...
@@ -352,6 +358,7 @@ public:
 			ahead = a;
 			++nasteroids;
 		}
+
 		clock_gettime(CLOCK_REALTIME, &powerUpTimer);
 
 		clock_gettime(CLOCK_REALTIME, &bulletTimer);
@@ -502,6 +509,9 @@ public:
 
 
 //function prototypes
+void powerUpOne(Bullet*, int, int, Ship, double, double);
+void powerUpTwo(Bullet*, int, int, Ship, double, double);
+int detectPowerUpCollisionWithShip(float xval, float yval, PowerUp *p);
 void checkIfPowerUpShouldSpawn();
 void setupGame();
 void renderPowerUpImage(GLuint, float*);
@@ -1041,6 +1051,22 @@ void check_mouse(XEvent *e)
 					++g.nbullets;
 					++g.score;
 				}
+				if (g.puOne == 1) {
+					powerUpOne(g.barr, g.nbullets, MAX_BULLETS, g.ship, rnd(),
+								PI);
+					Bullet *bOne = &g.barr[g.nbullets];
+					timeCopy(&bOne->time, &bt);
+					g.nbullets++;
+					++g.score;
+				}
+				if (g.puTwo == 1) {
+					powerUpTwo(g.barr, g.nbullets, MAX_BULLETS, g.ship, rnd(),
+								PI);
+					Bullet *bOne = &g.barr[g.nbullets];
+					timeCopy(&bOne->time, &bt);
+					g.nbullets++;
+					++g.score;
+				}
 			}
 		}
 		if (e->xbutton.button==3) {
@@ -1399,6 +1425,24 @@ void physics()
 	} else {
 		gl.collision_det = 0;
 	}
+
+	PowerUp *p = g.newer;
+	if (detectPowerUpCollisionWithShip(g.ship.pos[0], g.ship.pos[1], p)) {
+		g.newer = NULL;
+		g.npowerups--;
+		if (g.puOne == 0)
+		{
+			g.puOne = 1;
+		}
+		else if (g.puTwo == 0)
+		{
+			g.puTwo = 1;
+		}
+		else if (g.puThree == 0)
+		{
+			g.puThree = 1;
+		}
+	}
 	
 	if (gl.keys[XK_space]) {
 		//a little time between each bullet
@@ -1428,6 +1472,22 @@ void physics()
 				b->color[0] = 1.0f;
 				b->color[1] = 1.0f;
 				b->color[2] = 1.0f;
+				g.nbullets++;
+				++g.score;
+			}
+			if (g.puOne == 1) {
+				powerUpOne(g.barr, g.nbullets, MAX_BULLETS, g.ship, rnd(),
+							PI);
+				Bullet *bOne = &g.barr[g.nbullets];
+				timeCopy(&bOne->time, &bt);
+				g.nbullets++;
+				++g.score;
+			}
+			if (g.puTwo == 1) {
+				powerUpTwo(g.barr, g.nbullets, MAX_BULLETS, g.ship, rnd(),
+							PI);
+				Bullet *bOne = &g.barr[g.nbullets];
+				timeCopy(&bOne->time, &bt);
 				g.nbullets++;
 				++g.score;
 			}
